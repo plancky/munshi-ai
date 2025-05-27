@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   viewBox="0 0 198.59285 198.59286"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <g
+     id="layer1"
+     transform="translate(-5.0000001,-46.565081)">
+    <rect
+       style="opacity:1;fill:#000000;fill-opacity:0;fill-rule:nonzero;stroke-width:10;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1;paint-order:normal"
+       id="rect1"
+       stroke="currentColor"
+       width="188.59285"
+       height="188.59285"
+       x="10"
+       y="51.565079" />
+    <g
+       id="g39"
+        stroke="currentColor"
+        fill="currentColor"
+       style="fill-opacity:1">
+      <path
+         d="M 99.914794,171.34129 129.62941,142.61381 100.64756,113.57162 70.932953,142.29911 Z M 47.904147,164.5629 40,156.6423 115.02937,84.105417 122.93351,92.026014 108.81904,105.67151 170,167.1709 l -8.17148,7.90011 -23.50453,-23.74453 -29.71463,28.72747 6.1916,6.20448 c 1.40517,1.40811 2.38707,2.87959 2.94572,4.41446 0.55865,1.53488 0.50779,2.62151 -0.15257,3.25991 -1.89863,1.83515 -7.31331,2.74712 -16.24403,2.7359 -8.93092,-0.0115 -14.274618,-0.89728 -16.031106,-2.65731 -1.141703,-1.14409 -1.738974,-2.55514 -1.791815,-4.23318 -0.05285,-1.67806 0.457258,-3.0358 1.530302,-4.07319 l 6.685789,-6.46367 -28.98183,-29.04218 z"
+         id="path39"
+         style="font-size:165.34px;opacity:1;fill-opacity:1"
+         stroke="currentColor"
+         aria-label="म" />
+    </g>
+  </g>
+</svg>

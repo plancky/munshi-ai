@@ -1,0 +1,37 @@
+{
+    "compilerOptions": {
+        "lib": ["dom", "dom.iterable", "ESNext"],
+        "target": "ESNext",
+        "allowJs": true,
+        "skipLibCheck": true,
+        "strict": false,
+        "noEmit": true,
+        "esModuleInterop": true,
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "jsx": "preserve",
+        "incremental": true,
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ],
+        "paths": {
+            "@/*": ["./*"],
+            "@/app/*": ["./src/app/*"],
+            "@/components/*": ["./src/components/*"]
+        },
+        "strictNullChecks": true,
+        "typeRoots": ["./src/types"]
+    },
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts",
+        "utils/ytAgent.js"
+    ],
+    "exclude": ["node_modules", "app/api/test/*.ts"]
+}
