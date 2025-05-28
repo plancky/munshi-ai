@@ -58,10 +58,10 @@ export default function HeroSection({ ...props }: SectionProps) {
                         className={buttonVariants({
                             variant: "default",
                         })}
-                        href={config.links["try-munshi"].href}
+                        href={config.links["ask-munshi"].href}
                     >
                         <span className="flex gap-2">
-                            {config.links["try-munshi"].name}
+                            {config.links["ask-munshi"].name}
                             {<ArrowSquareOutIcon size={16} />}
                         </span>
                     </Link>

@@ -1,91 +1,61 @@
-# Munshi
-
-
-## Table of Contents
-
--   [About the Project](#about-the-project)
--   [Features](#features)
--   [Getting Started](#getting-started)
-    -   [Prerequisites](#prerequisites)
-    -   [Installation](#installation)
-    -   [Usage](#usage)
--   [Configuration (Optional)](#configuration-optional)
--   [Roadmap](#roadmap)
--   [Contributing](#contributing)
--   [License](#license)
--   [Contact](#contact)
--   [Acknowledgments](#acknowledgments)
-
----
-
-## About the Project
+# Munshi AI: Your Personal Audio Transcription Assistant
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Stars](https://img.shields.io/github/stars/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME?style=social)](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME?style=social)](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/network/members)
-[![GitHub Issues](https://img.shields.io/github/issues/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME)](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME)](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME/pulls)
+[![GitHub Stars](https://img.shields.io/github/stars/plancky/munshi-ai?style=social)](https://github.com/plancky/munshi-ai/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/plancky/munshi-ai?style=social)](https://github.com/plancky/munshi-ai/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/plancky/munshi-ai)](https://github.com/plancky/munshi-ai/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/plancky/munshi-ai)](https://github.com/plancky/munshi-ai/pulls)
 
-Briefly introduce your project. What problem does it solve? What is its purpose? Keep this section concise and engaging. You can include screenshots or GIFs here to showcase your project visually.
+<div style="display:flex; gap: 16px; flex-wrap: wrap;">
+<div style="min-width: 200px; width: 200px; flex: 1;">
+Munshi AI is a powerful app designed to transform long-form audio into text within seconds. Whether you're recording interviews, podcasts, lectures, or meetings, Munshi AI delivers lightning-fast, highly accurate, and multi-lingual transcriptions—powered by the latest OpenAI Whisper model.
+</div>
+<img src="logo/logo.png" alt="Description" style="width:120px; min-width:16px; height: 100%; ">
+</div>
 
----
+## Why Munshi AI?
 
-## Features
+Long recordings shouldn’t mean long wait times. Munshi AI eliminates the time-consuming and error-prone process of manual transcription, helping you work smarter, not harder.
 
--   List the key features of your project using bullet points.
--   Be specific and highlight what makes your project stand out.
--   (Example: User authentication, data visualization, real-time updates, etc.)
+Key Features:
 
----
+- ⚡ Instant Transcription:
+    Transcribe hours of audio in just seconds, thanks to cutting-edge AI.
 
-## Getting Started
+- 🎯 Unmatched Accuracy:
+    Built on the newest OpenAI Whisper model, delivering state-of-the-art results.
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+- 🌍 Multi-Lingual Support:
+    Supports transcription in dozens of languages with native-level fluency.
 
-### Prerequisites
+- 🔐 Secure & Private:
+    All data is encrypted. Your content stays yours.
 
-List any software, libraries, or dependencies users need to have installed before setting up your project.
+- 📁 Export & Share:
+    Download transcriptions in text.
 
--   `Node.js` (e.g., `v14.x`)
--   `Python` (e.g., `v3.9`)
--   `npm` or `yarn`
+## 🛠️ Use Cases
 
-### Installation
+🎙 Podcasters:
+Automatically generate show notes, transcripts, and captions to improve SEO and accessibility.
 
-Provide step-by-step instructions on how to install and set up your project.
+📰 Journalists & Reporters:
+Instantly convert interviews and voice memos into editable text for faster story development.
 
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME.git](https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPOSITORY_NAME.git)
-    cd YOUR_REPOSITORY_NAME
-    ```
-2.  **Install dependencies:**
+🎓 Academics & Researchers:
+Transcribe lectures, seminars, and field interviews—perfect for note-taking, analysis, or publication.
 
-    ```bash
-    # For Node.js projects
-    npm install
-    # or
-    yarn install
+🏢 Corporate Teams:
+Turn meetings, training sessions, and voice calls into searchable documentation.
 
-    # For Python projects
-    pip install -r requirements.txt
-    ```
+🎥 Media & Content Creators:
+Create subtitles and transcripts for videos, boosting engagement and accessibility.
 
-3.  **Set up environment variables (if applicable):**
-    -   Create a `.env` file in the root directory.
-    -   Add necessary environment variables (e.g., API keys, database URLs):
-        ```
-        API_KEY=your_api_key
-        DATABASE_URL=your_database_url
-        ```
+📞 Customer Support & Sales Teams:
+Analyze calls for insights, compliance, or training—without manual effort.
 
-### Usage
+## License
 
-Explain how to use your project once it's installed. Provide examples of common commands or workflows.
+This source code is licensed under Copyright 2024-2025 Shashvat Jain.
 
-```bash
-# Example command to run the application
-npm start
-# or
-python main.py
-```
+read [here.](LICENSE.md)
