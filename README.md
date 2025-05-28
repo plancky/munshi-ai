@@ -6,12 +6,12 @@
 [![GitHub Issues](https://img.shields.io/github/issues/plancky/munshi-ai)](https://github.com/plancky/munshi-ai/issues)
 [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/plancky/munshi-ai)](https://github.com/plancky/munshi-ai/pulls)
 
-<div style="display:flex; gap: 16px; flex-wrap: wrap;">
-<div style="min-width: 200px; width: 200px; flex: 1;">
+<img width="120" height="120" alt="Browserslist logo by Anton Popov"
+     src="./logo/logo_white_bg.png" align="right">
+
 Munshi AI is a powerful app designed to transform long-form audio into text within seconds. Whether you're recording interviews, podcasts, lectures, or meetings, Munshi AI delivers lightning-fast, highly accurate, and multi-lingual transcriptions—powered by the latest OpenAI Whisper model.
-</div>
-<img src="logo/logo.png" alt="Description" style="width:120px; min-width:16px; height: 100%; ">
-</div>
+
+
 
 ## Why Munshi AI?
 
