@@ -59,7 +59,7 @@ export default function TranscriptCard({
                                     Summary
                                 </span>
                                 <ClipboardCopy
-                                    textToCopy={location.href}
+                                    textToCopy={undefined}
                                     Icon={<LinkSimpleIcon size={16} />}
                                 />
                             </div>
@@ -67,7 +67,7 @@ export default function TranscriptCard({
                                 dangerouslySetInnerHTML={{
                                     __html: summary_gemini,
                                 }}
-                                className="h-full pr-2 prose lg:prose-lg prose-shadcn"
+                                className="h-full pr-2 !max-w-full prose lg:prose-lg prose-shadcn"
                             ></div>
                         </CardContent>
                     </Card>

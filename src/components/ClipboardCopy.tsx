@@ -1,9 +1,10 @@
+"use client";
 import React, { ReactElement, useCallback, useState } from "react";
 import { Button } from "@/components/ui/button"; // shadcn/ui button
 import { Check, Copy } from "lucide-react";
 
 interface ClipboardCopyProps {
-    textToCopy: string;
+    textToCopy?: string;
     className?: string;
     Icon?: ReactElement;
 }
@@ -17,7 +18,8 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({
 
     const handleCopy = useCallback(async (): Promise<void> => {
         try {
-            await navigator.clipboard.writeText(textToCopy);
+            if (textToCopy) await navigator.clipboard.writeText(textToCopy);
+            else await navigator.clipboard.writeText(window.location.href)
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
