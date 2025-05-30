@@ -25,7 +25,7 @@ export default function SelectAudioCard({ ...props }: SelectAudioCardProps) {
         <section {...props}>
             <Card className="w-full bg-transparent">
                 <CardHeader className="">
-                    <div className="mb-2 flex justify-between gap-4 font-heading text-md">
+                    <div className="mb-2 flex justify-between flex-wrap gap-4 font-heading text-md">
                         <h2 className="flex-1">Audio Selection</h2>
                         <div className="flex items-start">
                             <AudioSelectMethodToggleGroup />

@@ -22,6 +22,7 @@ export function InputFile() {
                         id="audio"
                         type="file"
                         accept=".mp3"
+                        className="!w-fit"
                         onChange={async (event) => {
                             const value = event.target.value;
                             const files = event.target.files;
@@ -70,12 +71,14 @@ export function VisualAudioFile() {
     return (
         <>
             {audioFile && (
-                <div className="flex gap-1">
-                    <div className="flex flex-1 flex-col gap-4 py-2">
-                        <div className="flex items-center justify-between">
-                            <h2 className="font-heading text-subheading_sm lg:text-subheading">
-                                {audioFile.metadata.name}
-                            </h2>
+                <div className="flex w-full max-w-full gap-1">
+                    <div className="flex w-full flex-1 flex-col gap-4 py-2">
+                        <div className="flex w-full items-center justify-between">
+                            <div className="flex-1 max-w-full w-[90%] overflow-clip basis-4/5">
+                                <h2 className="text-wrap hyphens-auto font-heading text-subheading_sm lg:text-subheading">
+                                    {audioFile.metadata.name}
+                                </h2>
+                            </div>
                             <Button
                                 variant={"default"}
                                 onClick={(event) => {
@@ -84,11 +87,9 @@ export function VisualAudioFile() {
                                         payload: {},
                                     });
                                 }}
-                                className="aspect-square h-5 w-5 cursor-pointer rounded-sm p-1"
+                                className="aspect-square h-5 w-5 grow-0 cursor-pointer rounded-sm p-1"
                             >
-                                <span>
-                                    <Icons.close className="h-full w-full" />
-                                </span>
+                                <Icons.close className="h-full w-full" />
                             </Button>
                         </div>
 
