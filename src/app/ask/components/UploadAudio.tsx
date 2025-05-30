@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/hooks/use-toast";
 import { uploadFileInChunks } from "./utils";
 import { CheckCircleIcon, UploadIcon } from "@phosphor-icons/react/dist/ssr";
+import { useMutation } from "@tanstack/react-query";
+import { MODAL_URL } from "@/lib/url";
 
 export function InputFile() {
     const { formState, dispatch } = React.useContext(FormStateContext);
@@ -74,8 +76,8 @@ export function VisualAudioFile() {
                 <div className="flex w-full max-w-full gap-1">
                     <div className="flex w-full flex-1 flex-col gap-4 py-2">
                         <div className="flex w-full items-center justify-between">
-                            <div className="flex-1 max-w-full w-[90%] overflow-clip basis-4/5">
-                                <h2 className="text-wrap hyphens-auto font-heading text-subheading_sm lg:text-subheading">
+                            <div className="w-[90%] max-w-full flex-1 basis-4/5 overflow-clip">
+                                <h2 className="hyphens-auto text-wrap font-heading text-subheading_sm lg:text-subheading">
                                     {audioFile.metadata.name}
                                 </h2>
                             </div>
@@ -109,57 +111,61 @@ export function VisualAudioFile() {
 }
 
 function UploadButton() {
-    const [loading, setLoading] = React.useState<boolean>(false);
     const { formState, dispatch } = useFormState();
     const progressBar = useRef<HTMLDivElement>(null);
 
-    const url =
-        (process.env.NODE_ENV !== "production"
-            ? process.env.NEXT_PUBLIC_MODAL_APP_DEV
-            : process.env.NEXT_PUBLIC_MODAL_APP) + "/upload_file";
+    const url = MODAL_URL + "/upload_file";
+
+    const { mutate, isPending, isSuccess, isError, isIdle } = useMutation({
+        mutationFn: () => {
+            return uploadFileInChunks(
+                formState.audioFile?.file!,
+                formState.audioFile?.metadata,
+                url,
+                progressBar.current,
+            );
+        },
+        onMutate: (variables) => {
+            return variables;
+        },
+        onError: (error, variables, context) => {
+            // An error happened!
+            toast({
+                title: "Failed to Upload!",
+                description: "Could not upload! Retry later!",
+            });
+        },
+        onSuccess: (data, variables, context) => {
+            dispatch!({
+                type: FormStateActionTypes.UPLOADED,
+                payload: {
+                    id: data.id,
+                },
+            });
+            toast({
+                title: "Uploaded",
+                description: "Data uploaded.",
+            });
+        },
+        onSettled: (data, error, variables, context) => {},
+    });
 
     const onSubmit = useCallback(async () => {
-        setLoading(true);
-        await uploadFileInChunks(
-            formState.audioFile?.file!,
-            formState.audioFile?.metadata,
-            url,
-            progressBar.current,
-        )
-            .then((data) => {
-                setLoading(false);
-                dispatch!({
-                    type: FormStateActionTypes.UPLOADED,
-                    payload: {
-                        id: data.id,
-                    },
-                });
-                toast({
-                    title: "Uploaded",
-                    description: "Data uploaded.",
-                });
-            })
-            .catch((e) => {
-                setLoading(false);
-            });
-        toast({
-            title: "Transcription Initiated",
-            description: "redirecting...",
-        });
-    }, [formState, formState, dispatch]);
+        mutate();
+    }, [formState, formState, dispatch, mutate]);
 
     return (
         <>
             <div ref={progressBar} className="flex w-full">
                 {!formState.isUploaded ? (
                     <>
-                        {loading ? (
+                        {isPending ? (
                             <div className="relative h-5 w-full rounded-lg bg-slate-400">
                                 <div className="absolute h-full w-[var(--filled,0%)] rounded-lg bg-green-300"></div>
                             </div>
                         ) : (
                             <Button
-                                disabled={!formState?.audioFile || loading}
+                                disabled={!formState?.audioFile || isPending}
                                 onClick={() => {
                                     onSubmit();
                                 }}

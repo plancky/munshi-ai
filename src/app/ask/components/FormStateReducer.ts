@@ -95,6 +95,8 @@ export function audioSelectReducer(
             const new_state = {
                 ...state,
                 audioFile: undefined,
+                isUploaded: false,
+                id: undefined,
             };
             saveState(new_state);
             return new_state;

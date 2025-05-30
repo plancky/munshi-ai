@@ -15,7 +15,6 @@ export async function uploadFileInChunks(
     const uploadPromises: Promise<Response>[] = [];
     let uploadedChunks = 0;
     let fileId;
-    console.log(progressBar);
 
     for (let i = 0; i < totalChunks; i++) {
         const start = i * CHUNK_SIZE;
@@ -48,14 +47,11 @@ export async function uploadFileInChunks(
 
             if (i == totalChunks - 1) {
                 const data = await response.json();
-                console.log(data);
                 fileId = data?.id;
             }
         } catch (err) {
-            console.error(`Error uploading chunk ${i}:`, err);
-            Promise.reject(err);
+            return Promise.reject(err);
         }
     }
     return { id: fileId as string };
 }
-

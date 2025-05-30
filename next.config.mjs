@@ -5,6 +5,7 @@ const nextConfig = {
             fullUrl: true,
         },
     },
+    crossOrigin: "anonymous",
     webpack: (
         config,
         { buildId, dev, isServer, defaultLoaders, nextRuntime, webpack },

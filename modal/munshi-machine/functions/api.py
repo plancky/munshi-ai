@@ -1,9 +1,5 @@
 from __future__ import unicode_literals
 from fastapi import Request, FastAPI, responses
-from fastapi.middleware.cors import CORSMiddleware
-from modal import (
-    asgi_app,
-)
 
 from ..volumes import transcriptions_vol
 from .. import config
@@ -13,18 +9,15 @@ from .transcribe import WhisperV3
 from .functions import init_transcription, gen_summary
 from ..lib.utils import output_handler
 
+from .middleware import add_cors
+
+
 # Logger
 logger = config.get_logger("MAIN")
 
 # FastAPI config
 web_app = FastAPI()
-web_app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+add_cors(web_app)
 
 WhisperV3Cls = WhisperV3
 
