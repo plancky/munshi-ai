@@ -2,6 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 
 const LOADING_MESSAGES = {
+    [TRANSCRIPTION_STATUS.HOLD]: "Loading...",
     [TRANSCRIPTION_STATUS.INIT]: "Initiated transcript generation...",
     [TRANSCRIPTION_STATUS.FETCHING_AUDIO]: "Downloading Audio from Youtube...",
     [TRANSCRIPTION_STATUS.TRANSCRIBING]: "Munshi is transcribing the audio for you...",

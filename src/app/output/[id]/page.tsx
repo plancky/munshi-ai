@@ -11,15 +11,16 @@ export const metadata: Metadata = {
         "   An AI-powered assistant that transcribes and summarises audio so that you don't have to.",
 };
 
-type TranscriptPageParams = {
+type TranscriptPageParams = Promise<{
     id: string;
-};
+}>;
 
 type PageProps = {
     params: TranscriptPageParams;
 };
 
-export default function TranscriptPageWrapper({ params: { id } }: PageProps) {
+export default async function TranscriptPageWrapper({ params }: PageProps) {
+    const { id } = await params;
     const queryClient = getQueryClient();
     void queryClient.prefetchQuery(dataFetchOptions(id));
 
