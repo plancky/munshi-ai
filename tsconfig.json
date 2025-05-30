@@ -19,9 +19,8 @@
             }
         ],
         "paths": {
-            "@/*": ["./*"],
-            "@/app/*": ["./src/app/*"],
-            "@/components/*": ["./src/components/*"]
+            "@/*": ["./src/*"],
+            "@/logo/*": ["./logo/*"]
         },
         "strictNullChecks": true,
         "typeRoots": ["./src/types"]

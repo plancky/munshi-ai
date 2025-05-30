@@ -29,6 +29,9 @@ CACHE_DIR = "/cache"
 # Mostly .mp3 files 50-100MiB.
 RAW_AUDIO_DIR = pathlib.Path(CACHE_DIR, "raw_audio")
 
+UPLOAD_CHUNK_DIR = pathlib.Path(CACHE_DIR, "chunks")
+UPLOAD_AUDIO_DIR = pathlib.Path(CACHE_DIR, "upload_audio")
+
 # Stores metadata of individual podcast episodes as JSON.
 PODCAST_METADATA_DIR = pathlib.Path(CACHE_DIR, "podcast_metadata")
 
@@ -47,15 +50,16 @@ BASE_PYTHON_PACKAGES = [
     "packaging",
     "wheel",
     "ffmpeg-python",
-    "mutagen"
+    "mutagen",
+    "python-multipart"
 ]
 
 ML_PYTHON_PACKAGES = [
-    "transformers",
+    "transformers==4.36.2",
     "ninja",
     "hf-transfer~=0.1",
-    "torch",
-    "torchvision"
+    "torch==2.6.0",
+    "torchvision==0.21.0",
 ]
 
 PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES

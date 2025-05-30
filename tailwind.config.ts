@@ -42,6 +42,44 @@ const config: Config = {
                 body_lg: ["1.2rem", "1.4", "1.2", "400"],
                 body_sm: ["0.8rem", "1.4", "1.2", "400"],
             }),
+            typography: () => ({
+                shadcn: {
+                    css: {
+                        "--tw-prose-body": "var(--color-foreground)",
+                        "--tw-prose-headings": "var(--color-foreground)",
+                        "--tw-prose-lead": "var(--color-foreground)",
+                        "--tw-prose-links": "var(--color-foreground)",
+                        "--tw-prose-bold": "var(--color-foreground)",
+                        "--tw-prose-counters": "var(--color-foreground)",
+                        "--tw-prose-bullets": "var(--color-foreground)",
+                        "--tw-prose-hr": "var(--color-foreground)",
+                        "--tw-prose-quotes": "var(--color-foreground)",
+                        "--tw-prose-quote-borders": "var(--color-foreground)",
+                        "--tw-prose-captions": "var(--color-foreground)",
+                        "--tw-prose-code": "var(--color-foreground)",
+                        "--tw-prose-pre-code": "var(--color-foreground)",
+                        "--tw-prose-pre-bg": "var(--color-foreground)",
+                        "--tw-prose-th-borders": "var(--color-foreground)",
+                        "--tw-prose-td-borders": "var(--color-foreground)",
+                        "--tw-prose-invert-body": "var(--color-foreground)",
+                        "--tw-prose-invert-headings": "var(--color-foreground)",
+                        "--tw-prose-invert-lead": "var(--color-foreground)",
+                        "--tw-prose-invert-links": "var(--color-foreground)",
+                        "--tw-prose-invert-bold": "var(--color-foreground)",
+                        "--tw-prose-invert-counters": "var(--color-foreground)",
+                        "--tw-prose-invert-bullets": "var(--color-foreground)",
+                        "--tw-prose-invert-hr": "var(--color-foreground)",
+                        "--tw-prose-invert-quotes": "var(--color-foreground)",
+                        "--tw-prose-invert-quote-borders":
+                            "var(--color-foreground)",
+                        "--tw-prose-invert-captions": "var(--color-foreground)",
+                        "--tw-prose-invert-th-borders":
+                            "var(--color-foreground)",
+                        "--tw-prose-invert-td-borders":
+                            "var(--color-foreground)",
+                    },
+                },
+            }),
             colors: {
                 background: "hsl(var(--background) / var(--tw-bg-opacity))",
                 foreground: "hsl(var(--foreground) / var(--tw-text-opacity))",
@@ -94,6 +132,9 @@ const config: Config = {
             },
         },
     },
-    plugins: [require("tailwindcss-animate")],
+    plugins: [
+        require("tailwindcss-animate"),
+        require("@tailwindcss/typography"),
+    ],
 };
 export default config;

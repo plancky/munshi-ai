@@ -5,23 +5,25 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Icons } from "@/components/icons/icons";
 
 import { getSummary } from "./utils";
+import ClipboardCopy from "@/components/ClipboardCopy";
+import { ModedOutputDataObject } from "../../api/get/types";
+import { MetadataObject } from "@/shared/types";
+import { LinkSimpleIcon } from "@phosphor-icons/react/dist/ssr";
 const { VideoTitleIcon, AuthorIcon } = Icons;
 
-type MunshiOutput = {
-    data: any;
-    title: string[] | null;
-    author: string[] | null;
-};
+interface TranscriptCardProps {
+    data: ModedOutputDataObject;
+    metadata: MetadataObject;
+    id: string;
+}
 
 export default function TranscriptCard({
-    data: dataProp,
+    data,
+    metadata,
     id: idProp,
-}: {
-    data: MunshiOutput;
-    id: string;
-}) {
-    const { text, summary_gemini, paras } = dataProp?.data;
-    const { title: audioTitle, author } = dataProp;
+}: TranscriptCardProps) {
+    const { text, summary_gemini, paras } = data;
+    const { title: audioTitle, author } = metadata;
     return (
         <div className="z-0 grid w-full grid-cols-1 grid-rows-1 place-items-center pb-20 pt-28 lg:pt-40">
             <div className="z-0 col-span-1 row-span-1 flex h-full flex-col items-start gap-5 lg:max-w-[1020px]">
@@ -41,7 +43,7 @@ export default function TranscriptCard({
                                 </>
                             )}
                             {author && (
-                                <div className="text-subheading flex items-center gap-2 font-heading">
+                                <div className="flex items-center gap-2 font-heading text-subheading">
                                     <>
                                         <span className="h-4">
                                             <AuthorIcon className="h-full w-full" />
@@ -52,21 +54,30 @@ export default function TranscriptCard({
                             )}
                         </CardHeader>
                         <CardContent className="flex h-full flex-1 flex-col">
-                            <span className="text-md mb-5 font-heading lg:text-lg">
-                                Summary
-                            </span>
+                            <div className="flex justify-between py-4 text-md lg:text-lg">
+                                <span className="mb-5 font-heading text-md lg:text-lg">
+                                    Summary
+                                </span>
+                                <ClipboardCopy
+                                    textToCopy={location.href}
+                                    Icon={<LinkSimpleIcon size={16} />}
+                                />
+                            </div>
                             <div
                                 dangerouslySetInnerHTML={{
                                     __html: summary_gemini,
                                 }}
-                                className="h-full pr-2"
+                                className="h-full pr-2 prose lg:prose-lg prose-shadcn"
                             ></div>
                         </CardContent>
                     </Card>
                 )}
-                <Card className="flex flex-col">
+                <Card className="flex flex-col relative">
                     <CardHeader>
-                        <span className="text-md lg:text-lg">Transcript</span>
+                        <div className="flex justify-between top-0 sticky text-md lg:text-lg">
+                            <span>Transcript</span>
+                            <ClipboardCopy textToCopy={text} />
+                        </div>
                         {!summary_gemini && (
                             <Button
                                 onClick={() => {
@@ -77,7 +88,7 @@ export default function TranscriptCard({
                             </Button>
                         )}
                     </CardHeader>
-                    <CardContent className="h-full pb-5 [&_p]:mb-5">
+                    <CardContent className="h-full pb-5 [&_p]:mb-5 prose lg:prose-lg prose-shadcn !max-w-full">
                         {paras?.map((para, _i) => (
                             <p key={`para_${_i}`}>{para}</p>
                         ))}

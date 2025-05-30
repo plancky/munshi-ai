@@ -1,5 +1,5 @@
 import React from "react";
-import { FormStateContext } from "./AskMunshiSection";
+import { FormStateContext } from "./form-state-provider";
 import {
     Card,
     CardHeader,
@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/card";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 import { AudioSelectMethod, FormStateActionTypes } from "./FormStateReducer";
 import { InputFile, VisualAudioFile } from "./UploadAudio";
 import { DownloadAudioForm } from "./DownloadAudio";
@@ -25,7 +25,7 @@ export default function SelectAudioCard({ ...props }: SelectAudioCardProps) {
         <section {...props}>
             <Card className="w-full bg-transparent">
                 <CardHeader className="">
-                    <div className="mb-2 flex justify-between font-heading text-md gap-4">
+                    <div className="mb-2 flex justify-between gap-4 font-heading text-md">
                         <h2 className="flex-1">Audio Selection</h2>
                         <div className="flex items-start">
                             <AudioSelectMethodToggleGroup />
@@ -35,7 +35,7 @@ export default function SelectAudioCard({ ...props }: SelectAudioCardProps) {
                         <span>
                             Select audio method, <br></br> Download the audio
                             directly from an external source url or Upload the
-                            audio file.
+                            audio file. (Audio Downloads are currently diasabled.)
                         </span>
                     </CardDescription>
                 </CardHeader>
@@ -79,17 +79,21 @@ export function AudioSelectMethodToggleGroup() {
                     value: AudioSelectMethod.UPLOAD,
                     label: "Upload",
                     icon: {},
+                    tooltipcontent: "Upload Audio file.",
                     position: "first",
                 },
                 {
                     value: AudioSelectMethod.DOWNLOAD,
                     label: "Download",
                     icon: {},
+                    disabled: true,
+                    tooltipcontent: "Audio Downloads are currently diasabled.",
                     position: "last",
                 },
             ].map((item) => (
                 <ToggleGroupItem
                     key={item.value}
+                    disabled={item.disabled}
                     value={item.value}
                     aria-label={`Toggle ${item.label.toLowerCase()}`}
                     className={cn(

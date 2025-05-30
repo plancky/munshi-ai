@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-import { toast } from "@/src/lib/hooks/use-toast";
+import { toast } from "@/lib/hooks/use-toast";
 import { Dispatch, SetStateAction, createContext, useState } from "react";
 
 import { DownloadAudioCard } from "./DownloadAudioCard";

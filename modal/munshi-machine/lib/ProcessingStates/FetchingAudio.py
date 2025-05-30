@@ -1,7 +1,13 @@
 from ... import config
 
 logger = config.get_logger(__name__)
-from ..utils import updateOutputJson, updateOutputJsonDict, audio_path, get_url_from_vid
+from ..utils import (
+    updateOutputJson,
+    updateOutputJsonDict,
+    audio_path,
+    get_url_from_vid,
+    output_handler,
+)
 from .Transcribing import TranscribingProcessingState
 
 
@@ -14,7 +20,9 @@ class FetchingAudioProcessingState:
         return TranscribingProcessingState()
 
     async def run_job(self, vid: str) -> int | bytes:
-        from ..download_audio import get_stored_audio, download_audio, get_metadata
+        from ..download_audio import get_stored_audio, download_audio
+
+        self.vid = vid
 
         logger.info(f"Fetching Audio...")
         # update new state on the output json
@@ -23,14 +31,17 @@ class FetchingAudioProcessingState:
         # call = get_audio.spawn(get_url_from_vid(vid), self)
 
         audiofile_path = audio_path(vid)
+        oh = output_handler(vid)
+
         if audiofile_path.exists():
+            if oh.output.get("title") is None:
+                self.update_metadata()
+
             await self._next_state().run_job(vid)
             return get_stored_audio(audiofile_path)
         try:
             download_audio(get_url_from_vid(vid))
-
-            logger.info(f"Updating Metadata...")
-            updateOutputJsonDict(vid, get_metadata(vid))
+            self.update_metadata()
             await self._next_state().run_job(vid)
             return get_stored_audio(audiofile_path)
 
@@ -39,4 +50,8 @@ class FetchingAudioProcessingState:
             # set error on output_file file
             return 0
 
-    
+    def update_metadata(self):
+        from ..download_audio import get_metadata
+
+        logger.info(f"Updating Metadata...")
+        updateOutputJsonDict(self.vid, get_metadata(self.vid))

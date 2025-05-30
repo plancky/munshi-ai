@@ -1,9 +1,11 @@
+import { MODAL_URL } from "@/lib/url";
+
 export function getSummary(id: string) {
     const payload = JSON.stringify({
         vid: id,
     });
 
-    return fetch(process.env.NEXT_PUBLIC_MODAL_APP + "/summarize", {
+    return fetch(MODAL_URL + "/summarize", {
         method: "POST",
         body: payload,
         headers: {

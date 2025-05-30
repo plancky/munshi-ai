@@ -9,12 +9,17 @@ function sleep(ms) {
 }
 export async function generateAction(clientInputData: any) {
     // console.log(clientInputData.mediaUrl, process.env.NEXT_PUBLIC_MODAL_APP + "/transcribe")
+    console.log(clientInputData);
     const payload = JSON.stringify({
-        url: clientInputData.url,
+        url: clientInputData?.url,
+        audiofile: clientInputData?.audiofile
     });
+    console.log(payload)
 
     const { data, error } = await fetch(
-        process.env.NEXT_PUBLIC_MODAL_APP + "/transcribe",
+        (process.env.NODE_ENV !== "production"
+            ? process.env.NEXT_PUBLIC_MODAL_APP_DEV
+            : process.env.NEXT_PUBLIC_MODAL_APP) + "/transcribe_file",
         {
             method: "POST",
             body: payload,

@@ -1,4 +1,4 @@
-from .utils import (
+from ..utils import (
     output_handler,
     get_vid_from_url,
     MUNSHI_TRANSCRIPTION_STATUS,
@@ -7,14 +7,14 @@ from .utils import (
     updateOutputJson,
 )
 
-from .ProcessingStates.Summarizing import SummarizingGeminiProcessingState
-from .ProcessingStates.Transcribing import TranscribingProcessingState
-from .ProcessingStates.Completed import CompletedProcessingState
-from .ProcessingStates.FetchingAudio import FetchingAudioProcessingState
+from .Summarizing import SummarizingGeminiProcessingState
+from .Transcribing import TranscribingProcessingState
+from .Completed import CompletedProcessingState
+from .FetchingAudio import FetchingAudioProcessingState
 
 import asyncio
 import pathlib
-from .. import config
+from ... import config
 
 logger = config.get_logger(__name__)
 
@@ -49,13 +49,14 @@ class ProcessingState:
 class InitProcessingState:
     def __init__(self) -> None:
         self.StateSymbol = "Init"
+
         pass
 
     def _next_state(self):
         return FetchingAudioProcessingState()
 
-    async def run_job(self, vid: str, chained=True):
-        from ..volumes import transcriptions_vol, audio_storage_vol
+    async def run_job(self, vid: str, audiofile: str = None, chained=True):
+        from ...volumes import transcriptions_vol, audio_storage_vol
 
         # initate output json
         outputHandler = output_handler(vid)
@@ -71,6 +72,10 @@ class InitProcessingState:
             logger.info(f"Initiated new output file {out_path}")
             transcriptions_vol.commit()
             audio_storage_vol.commit()
+
+        if (audiofile is not None):
+            # save audiofile
+            pass
 
         if chained:
             await self._next_state().run_job(vid)

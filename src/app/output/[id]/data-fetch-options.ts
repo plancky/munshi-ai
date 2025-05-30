@@ -1,11 +1,12 @@
 import { queryOptions } from "@tanstack/react-query";
+import { ModedOutputObject } from "../../api/get/types";
 
 export function dataFetchOptions(id: string) {
     return queryOptions({
-        queryKey: ["fetch_data", id],
+        queryKey: ["output_data", id],
         queryFn: async ({ queryKey }) => {
             const [_key, vid] = queryKey;
-            return await getTranscript(vid);
+            return await getTranscript(vid) as ModedOutputObject;
         },
         refetchInterval: (query) => {
             const data = query?.state?.data;
@@ -25,7 +26,6 @@ async function getTranscript(id: string) {
     );
 
     url.searchParams.set("id", id);
-    console.log(url.toString())
 
     const res = await fetch(url, {
         method: "GET",

@@ -1,16 +1,31 @@
+import { MODAL_URL } from "@/lib/url";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
+import { cleanSummaryHtmlString, formatTranscriptInParagraphs } from "./utils";
+import { TRANSCRIPTION_STATUS } from "@/shared/constants";
+import { OutputObject } from "@/shared/types";
+import { ModedOutputDataObject, ModedOutputObject } from "./types";
+
+const NEXT_CACHE_OUTPUT_TAG = (id: string) => `output_${id}`;
 
 export async function GET(req: NextRequest) {
     try {
-        const id = req.nextUrl.searchParams.get('id');
+        const id = req.nextUrl.searchParams.get("id");
 
-        if (typeof id == "undefined") {
+        if (!id || typeof id == "undefined") {
             throw new Error("'id' is missing on the payload of get req.");
         }
 
         const resObject = await fetchTranscript(id!);
 
-        const dataObject = resObject.data.data;
+        const modedResObject: ModedOutputObject = { ...resObject };
+
+        if (!resObject?.status || resObject?.status !== TRANSCRIPTION_STATUS.COMPLETED) {
+            revalidateTag(NEXT_CACHE_OUTPUT_TAG(id));
+        }
+
+        const dataObject = modedResObject?.data;
+
         if (typeof dataObject !== "undefined") {
             const { summary_gemini: summary, text } = dataObject;
             if (summary) {
@@ -21,7 +36,12 @@ export async function GET(req: NextRequest) {
             }
         }
 
-        return NextResponse.json(resObject, { status: 200 });
+        console.log(
+            modedResObject?.status,
+            modedResObject?.metadata
+        );
+
+        return NextResponse.json(modedResObject, { status: 200 });
     } catch (e) {
         return NextResponse.json({ error: e }, { status: 400 });
     }
@@ -32,43 +52,18 @@ async function fetchTranscript(id: string) {
         vid: id,
     });
 
-    const res = await fetch(process.env.MODAL_APP + "/fetch_data", {
+    const res = await fetch(MODAL_URL + "/fetch_data", {
         method: "POST",
         body: payload,
         headers: {
             "Content-Type": "application/json",
         },
         next: {
-            revalidate: 5,
+            tags: [NEXT_CACHE_OUTPUT_TAG(id)],
         },
     });
-    return await res.json();
-}
-
-function formatTranscriptInParagraphs(text: string, wordLimit: number) {
-    const sentences = text.split(".");
-
-    const paras: string[] = [];
-    var curr_para = "";
-
-    sentences.forEach((sentence, _i) => {
-        const words_in_sentence = sentence.split(" ").length;
-
-        if (
-            words_in_sentence + curr_para.split(" ").length > wordLimit ||
-            _i == sentences.length - 1
-        ) {
-            paras.push(curr_para);
-            curr_para = "";
-        }
-        curr_para = curr_para + sentence + ".";
-    });
-
-    return paras;
-}
-
-function cleanSummaryHtmlString(html_str: string) {
-    // const clean_html = html_str.replace("\`\`\`", "").replace("html", "");
-    const match = /```html\n([\s\S]*?)```/g.exec(html_str);
-    return match ? match[1] : html_str;
+    if (!res.ok) {
+        throw Error("Transcript does not exist!");
+    }
+    return (await res.json()) as OutputObject;
 }

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
-import { TranscriptPage } from "./outputSection";
+import { TranscriptPage } from "./TranscriptPage";
 import { getQueryClient } from "@/app/get-query-client";
 import { dataFetchOptions } from "./data-fetch-options";
 import Providers from "@/app/providers";

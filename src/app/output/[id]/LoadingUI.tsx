@@ -1,22 +1,15 @@
 import { Skeleton } from "@/components/ui/skeleton";
-
-export enum LoadingStates {
-    initiated = "Init",
-    downloading_audio = "FetchingAudio",
-    transcribing = "Transcribing",
-    completed = "Completed",
-}
+import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 
 const LOADING_MESSAGES = {
-    Init: "Initiated transcript generation...",
-    FetchingAudio: "Downloading Audio from Youtube...",
-    Transcribing: "Munshi is transcribing the audio for you...",
-    Summarizing: "Transcription done! Summarizing...",
-    Completed: "Rendering...",
-    completed: "Rendering...",
+    [TRANSCRIPTION_STATUS.INIT]: "Initiated transcript generation...",
+    [TRANSCRIPTION_STATUS.FETCHING_AUDIO]: "Downloading Audio from Youtube...",
+    [TRANSCRIPTION_STATUS.TRANSCRIBING]: "Munshi is transcribing the audio for you...",
+    [TRANSCRIPTION_STATUS.SUMMARIZING]: "Transcription done! Summarizing...",
+    [TRANSCRIPTION_STATUS.COMPLETED]: "Rendering... Just a few more seconds.",
 };
 
-export default function LoadingUI(props: { state: LoadingStates }) {
+export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
     const message = LOADING_MESSAGES[props?.state];
 
     return (

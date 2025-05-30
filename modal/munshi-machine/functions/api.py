@@ -10,7 +10,8 @@ from .. import config
 
 # import modal functions and classes into this namespace for modal
 from .transcribe import WhisperV3
-from .functions import get_output, init_transcription, gen_summary
+from .functions import init_transcription, gen_summary
+from ..lib.utils import output_handler
 
 # Logger
 logger = config.get_logger("MAIN")
@@ -27,11 +28,90 @@ web_app.add_middleware(
 
 WhisperV3Cls = WhisperV3
 
+from fastapi import (
+    FastAPI,
+    UploadFile,
+    Form,
+    File,
+    Header,
+    Depends,
+    HTTPException,
+    status,
+)
+from ..lib.upload_utils import upload_chunk
+
+
+async def valid_content_length(content_length: int = Header(..., lt=10_000_000)):
+    return content_length
+
+
+@web_app.post("/upload_file", dependencies=[Depends(valid_content_length)])
+async def upload_file(
+    chunk: UploadFile = File(...),
+    chunkIndex: int = Form(...),
+    totalChunks: int = Form(...),
+    fileName: str = Form(...),
+):
+    import os
+
+    try:
+        if totalChunks > 20:
+            raise HTTPException(
+                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="chunk way too large"
+            )
+
+        [uploaded, fileId] = await upload_chunk(
+            chunk,
+            chunkIndex,
+            totalChunks,
+            fileName,
+        )
+        if uploaded:
+            return responses.JSONResponse(
+                content={"status": "chunk received", "id": fileId}, status_code=200
+            )
+        else:
+            return responses.JSONResponse(
+                content={"status": "chunk not received"}, status_code=403
+            )
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="something went wrong")
+
+
+@web_app.post("/transcribe_local")
+async def transcribe_local(request: Request):
+    from ..lib.utils import get_vid_from_url
+    from ..lib.ProcessingStates.InitJob import InitProcessingState
+
+    logger.info(f"Received a request {request.client}")
+
+    payload = await request.json()
+    try:
+        vid = payload.get("vid")
+    except KeyError:
+        return responses.PlainTextResponse(
+            content="bad request. url or vid missing", status_code=400
+        )
+
+    try:
+        await InitProcessingState().run_job(vid, chained=False)
+        call = init_transcription.spawn(None, vid)
+        return responses.JSONResponse(
+            content={"vid": vid, "call_id": call.object_id}, status_code=200
+        )
+    except RuntimeError as error:
+        print(error)
+        return responses.JSONResponse(
+            content={"error": "Server error occurred"}, status_code=500
+        )
+
 
 @web_app.post("/transcribe")
-async def transcribe(request: Request):
+async def transcribe_url(request: Request):
     from ..lib.utils import get_vid_from_url
-    from ..lib.ProcessingState import InitProcessingState
+    from ..lib.ProcessingStates.InitJob import InitProcessingState
 
     logger.info(f"Received a request {request.client}")
 
@@ -45,7 +125,7 @@ async def transcribe(request: Request):
         )
 
     try:
-        await InitProcessingState().run_job(vid, chained=False) 
+        await InitProcessingState().run_job(vid, chained=False)
         call = init_transcription.spawn(url)
         return responses.JSONResponse(
             content={"vid": vid, "call_id": call.object_id}, status_code=200
@@ -61,7 +141,7 @@ async def transcribe(request: Request):
 def stats(request: Request):
     from .transcribe import WhisperV3
 
-    print("Received a request from", request.client)
+    logger.info(f"Received a request from {request.client}")
 
     model = WhisperV3()
     f = model.generate
@@ -70,8 +150,6 @@ def stats(request: Request):
 
 @web_app.post("/fetch_data")
 async def fetch_output(request: Request):
-    transcriptions_vol.reload()
-    # audio_storage_vol.reload()
     logger.info(f"Received a request from {request.client}")
 
     payload = await request.json()
@@ -82,7 +160,9 @@ async def fetch_output(request: Request):
             content="bad request. vid missing", status_code=400
         )
     try:
-        status, data = get_output.remote(vid)
+        transcriptions_vol.reload()
+        oh = output_handler(vid)
+        status, data, metadata = oh.status, oh.data, oh.get_metadata()
         pass
     except RuntimeError as Error:
         return responses.JSONResponse(
@@ -92,7 +172,7 @@ async def fetch_output(request: Request):
             status_code=406,
         )
     return responses.JSONResponse(
-        content={"status": status, "data": data}, status_code=200
+        content={"status": status, "data": data, "metadata": metadata}, status_code=200
     )
 
 

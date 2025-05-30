@@ -14,6 +14,8 @@ def get_vid_from_url(url: str) -> str:
 
 
 def get_url_from_vid(vid: str) -> str:
+    if vid.startswith("local_"):
+        return ""
     return f"https://www.youtube.com/watch?v={vid}"
 
 
@@ -79,6 +81,9 @@ class output_handler:
 
     def update_field(self, fieldname, value):
         self.output[fieldname] = value
+
+    def get_metadata(self):
+        return {"title": self.output.get("title"), "author": self.output.get("author")}
 
     def write_transcription_data(self):
         with open(self.out_path, "w+", encoding="utf-8") as output_file:

@@ -1,5 +1,11 @@
-from ..app import app, base_image, custom_secret
-from ..volumes import audio_storage_vol, transcriptions_vol
+from ..app import app, base_image
+from ..secrets import custom_secret
+from ..volumes import (
+    audio_storage_vol,
+    transcriptions_vol,
+    upload_audio_vol,
+    chunk_storage_vol,
+)
 from .. import config
 from ..lib.utils import (
     audio_path,
@@ -7,9 +13,12 @@ from ..lib.utils import (
     output_handler,
     get_vid_from_url,
 )
-from ..lib.ProcessingState import InitProcessingState, processingStateFactory
+from ..lib.ProcessingStates.InitJob import InitProcessingState, processingStateFactory
 
 logger = config.get_logger(__name__)
+
+
+from modal import concurrent
 
 
 @app.function(
@@ -21,7 +30,7 @@ logger = config.get_logger(__name__)
     secrets=[custom_secret],
     timeout=2000,
 )
-async def init_transcription(url: str):
+async def init_transcription(url: str, vid: str = None):
     from ..lib.utils import get_vid_from_url, output_handler
 
     transcriptions_vol.reload()
@@ -29,7 +38,8 @@ async def init_transcription(url: str):
 
     logger.info("Running init_transcription function")
     # refresh volumes
-    vid = get_vid_from_url(url)
+    if vid is None:
+        vid = get_vid_from_url(url)
     oh = output_handler(vid)
     try:
         if oh.get_output() == -1:
@@ -41,20 +51,6 @@ async def init_transcription(url: str):
         logger.info("Unkown error occured: ", E)
         return "Unkown Error"
 
-
-@app.function(
-    image=base_image,
-    volumes={
-        str(config.RAW_AUDIO_DIR): audio_storage_vol,
-        str(config.TRANSCRIPTIONS_DIR): transcriptions_vol,
-    },
-    timeout=10,
-)
-def get_output(vid: str):
-    transcriptions_vol.reload()
-    oh = output_handler(vid)
-    oh.get_output()
-    return oh.status, oh.output
 
 
 @app.function(

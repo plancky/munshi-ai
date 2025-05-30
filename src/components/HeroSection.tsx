@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { config } from "@/app/config";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 import Logo from "@/logo/logo.svg?inline";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/ssr";
 

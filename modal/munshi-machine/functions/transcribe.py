@@ -1,4 +1,5 @@
 from modal import Image, App, method, asgi_app, functions, enter, exit as modal_exit
+import modal
 
 from ..app import app, cuda_image
 from ..config import MODEL_DIR, RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR, get_logger
@@ -12,13 +13,13 @@ logger = get_logger(__name__)
 @app.cls(
     image=cuda_image,
     gpu="A10G",
-    allow_concurrent_inputs=15,
-    container_idle_timeout=40,
+    scaledown_window=40,
     volumes={
         str(RAW_AUDIO_DIR): audio_storage_vol,
         str(TRANSCRIPTIONS_DIR): transcriptions_vol,
     },
 )
+@modal.concurrent(max_inputs=15)
 class WhisperV3:
     @enter()
     def setup(self):
@@ -31,10 +32,16 @@ class WhisperV3:
             MODEL_DIR,
             torch_dtype=self.torch_dtype,
             use_safetensors=True,
+            #low_cpu_mem_usage=True,
             attn_implementation="flash_attention_2",
-        )
+        ).to(self.device)
         processor = AutoProcessor.from_pretrained(MODEL_DIR)
-        model.to(self.device)
+        # Enable static cache and compile the forward pass
+        #model.generation_config.cache_implementation = "static"
+        #model.generation_config.max_new_tokens = 256
+        #model.forward = torch.compile(
+        #    model.forward, mode="reduce-overhead", fullgraph=True
+        #)
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model,

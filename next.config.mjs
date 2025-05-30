@@ -35,6 +35,9 @@ const nextConfig = {
         return config;
     },
     experimental: {
+        serverActions: {
+            bodySizeLimit: "20mb",
+        },
         optimizePackageImports: ["@phosphor-icons/react"],
     },
 };

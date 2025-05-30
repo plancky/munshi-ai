@@ -3,6 +3,7 @@ import { IBM_Plex_Sans_Thai, Exo_2 } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Backdrop from "@/components/backdrop.svg?inline";
+import { Toaster } from "../components/ui/toaster";
 
 const Exo2Font = Exo_2({
     weight: ["100", "300", "400", "700"],
@@ -46,6 +47,7 @@ export default function RootLayout({
                     <Header />
                     <main>{children}</main>
                 </div>
+                <Toaster />
             </body>
         </html>
     );
