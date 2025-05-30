@@ -1,5 +1,6 @@
 import { queryOptions } from "@tanstack/react-query";
 import { ModedOutputObject } from "../../api/get/types";
+import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 
 export function dataFetchOptions(id: string) {
     return queryOptions({
@@ -10,7 +11,9 @@ export function dataFetchOptions(id: string) {
         },
         refetchInterval: (query) => {
             const data = query?.state?.data;
-            return data?.status.toLowerCase() == "completed" ? false : 5000;
+            return data?.status == TRANSCRIPTION_STATUS.COMPLETED
+                ? false
+                : 5000;
         },
         refetchIntervalInBackground: true,
     });
