@@ -6,7 +6,7 @@ export function dataFetchOptions(id: string) {
         queryKey: ["output_data", id],
         queryFn: async ({ queryKey }) => {
             const [_key, vid] = queryKey;
-            return await getTranscript(vid) as ModedOutputObject;
+            return (await getTranscript(vid)) as ModedOutputObject;
         },
         refetchInterval: (query) => {
             const data = query?.state?.data;
@@ -17,11 +17,10 @@ export function dataFetchOptions(id: string) {
 }
 
 async function getTranscript(id: string) {
-
     const url = new URL(
         "/api/get",
-        process.env.NODE_ENV == "production"
-            ? process.env.BASE_URL
+        process?.env?.NODE_ENV == "production"
+            ? location.origin
             : "http://localhost:3000",
     );
 
