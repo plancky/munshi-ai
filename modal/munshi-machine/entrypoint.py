@@ -4,7 +4,7 @@ from .volumes import transcriptions_vol, audio_storage_vol
 from . import config
 from .functions.api import web_app
 from .images import base_image
-import modal
+import modal, os
 
 
 # Mount FastApi web api app

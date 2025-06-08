@@ -32,40 +32,39 @@ class WhisperV3:
             MODEL_DIR,
             torch_dtype=self.torch_dtype,
             use_safetensors=True,
-            #low_cpu_mem_usage=True,
+            # low_cpu_mem_usage=True,
             attn_implementation="flash_attention_2",
         ).to(self.device)
         processor = AutoProcessor.from_pretrained(MODEL_DIR)
-        # Enable static cache and compile the forward pass
-        #model.generation_config.cache_implementation = "static"
-        #model.generation_config.max_new_tokens = 256
-        #model.forward = torch.compile(
-        #    model.forward, mode="reduce-overhead", fullgraph=True
-        #)
+
+        self.generate_kwargs = {
+            "task": "translate",
+            "return_timestamps": True,
+            "num_beams": 1,  # on beam only (greedy decoding, forces determinism)
+            # "max_new_tokens": 256,
+            # "temperature": 0.0,
+            # "compression_ratio_threshold": float("inf"),  # Disable filtering retries
+            # "compression_ratio_threshold": 1.35,  # zlib compression ratio threshold (in token space)
+            # "logprob_threshold": -float("inf"),  # Disable filtering retries
+            "no_speech_threshold": 0.0,  # Forces decoding even if no speech detected
+        }
+
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
             tokenizer=processor.tokenizer,
             feature_extractor=processor.feature_extractor,
             torch_dtype=self.torch_dtype,
-            chunk_length_s=30,
-            batch_size=24,
-            return_timestamps=True,
-            model_kwargs={"use_flash_attention_2": True, "return_timestamps": True},
+            chunk_length_s=30,  # Chunk audio into segments (in seconds) for long audio
+            stride_length_s=1,  # Overlap between chunks to maintain context
+            batch_size=1,
+            return_timestamps=False,
+            model_kwargs={
+                "use_flash_attention_2": True,
+                # "condition_on_prev_tokens": True,  # Optional: for contextual coherence
+            },
             device=0,
         )
-
-        self.generate_kwargs = {
-            "max_new_tokens": 128,
-            "task": "translate",
-            "return_timestamps": True,
-            # "num_beams": 1,
-            # "condition_on_prev_tokens": False,
-            # "compression_ratio_threshold": 1.35,  # zlib compression ratio threshold (in token space)
-            # "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
-            # "logprob_threshold": -1.0,
-            # "no_speech_threshold": 0.6,
-        }
 
     @method()
     def generate(self, audio: bytes):

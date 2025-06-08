@@ -138,37 +138,16 @@ def transcribe_segment(
         # )
         result, time_elapsed = model.generate.remote(audio)
 
-        """
-        use_gpu = torch.cuda.is_available()
-        device = "cuda" if use_gpu else "cpu"
-        model = whisper.load_model(
-            model.name, device=device, download_root=config.MODEL_DIR
-        )
-        result = model.transcribe(f.name, language="en", fp16=use_gpu)  # type: ignore
-        """
-
     logger.info(
         f"Transcribed segment {start:.2f} to {end:.2f} ({end - start:.2f}s duration) in {time.time() - t0:.2f} seconds."
     )
     print(result)
-
-    """
-    # Add back offsets.
-    for segment in result["chunks"]:
-        _old_start, _old_end = segment["timestamp"]
-        segment["timestamp"] = (
-            _old_start + start,
-            _old_end + start if _old_end is not None else None,
-        )
-    """
 
     return [result, time_elapsed]
 
 
 def transcribe_episode(
     audio_filepath: pathlib.Path,
-    # result_path: pathlib.Path,
-    # model: config.ModelSpec,
 ) -> list[object, int]:
     from multiprocessing import Pool, TimeoutError
     from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
@@ -179,26 +158,7 @@ def transcribe_episode(
     output_segments = []
     total_time_elapsed = 0
 
-    """
-    with Pool(processes=8) as pool:
-        tasks = [
-            pool.apply_async(
-                transcribe_segment, (segment_start, segment_end, audio_filepath)
-            )
-            for segment_start, segment_end in segment_gen
-        ]
-        print(tasks)
-
-        # res = [task.get() for task in tasks]
-        res = [
-            transcribe_segment(segment_start, segment_end, audio_filepath)
-            for segment_start, segment_end in segment_gen
-        ]
-    """
-
     with ThreadPoolExecutor(max_workers=50) as executor:
-        # future = executor.submit(pow, 323, 1235)
-        # print(future.result())
         tasks = [
             executor.submit(
                 transcribe_segment, *(segment_start, segment_end, audio_filepath)
@@ -206,24 +166,14 @@ def transcribe_episode(
             for segment_start, segment_end in segment_gen
         ]
         res = [task.result() for task in tasks]
-    # res = await asyncio.gather(*tasks)
-    # print(res)
 
     for result, time_elapsed in res:
         output_text += result["text"]
-        # output_segments += result["chunks"]
         total_time_elapsed += time_elapsed
 
     result = {
         "text": output_text,
-        # "chunks": output_segments,
         "language": "en",
     }
 
     return [result, total_time_elapsed]
-
-    """
-    logger.info(f"Writing openai/whisper transcription to {result_path}")
-    with open(result_path, "w") as f:
-        json.dump(result, f, indent=4)
-    """
