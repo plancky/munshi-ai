@@ -1,7 +1,7 @@
 export const config = {
     links: {
         "ask-munshi": {
-            name: "Ask Munshi",
+            name: "Upload Audio",
             href: "/ask",
         },
     },

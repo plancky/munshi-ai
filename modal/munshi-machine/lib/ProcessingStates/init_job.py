@@ -1,16 +1,12 @@
 from ..utils import (
     output_handler,
-    get_vid_from_url,
-    MUNSHI_TRANSCRIPTION_STATUS,
-    audio_path,
-    get_url_from_vid,
     updateOutputJson,
 )
 
-from .Summarizing import SummarizingGeminiProcessingState
-from .Transcribing import TranscribingProcessingState
-from .Completed import CompletedProcessingState
-from .FetchingAudio import FetchingAudioProcessingState
+from .summarizing import SummarizingGeminiProcessingState
+from .transcribing import TranscribingProcessingState
+from .completed import CompletedProcessingState
+from .fetching_audio import FetchingAudioProcessingState
 
 import asyncio
 import pathlib
@@ -37,20 +33,17 @@ def processingStateFactory(symbol):
 class ProcessingState:
     def __init__(self) -> None:
         self.StateSymbol = ""
-        pass
 
     def _next_state():
-        pass
+        return None
 
     def run_job(vid):
-        pass
+        return None
 
 
 class InitProcessingState:
     def __init__(self) -> None:
         self.StateSymbol = "Init"
-
-        pass
 
     def _next_state(self):
         return FetchingAudioProcessingState()
@@ -60,7 +53,6 @@ class InitProcessingState:
 
         # initate output json
         outputHandler = output_handler(vid)
-        # outputHandler.initiate()
 
         # update new state on the output json
         out_path = outputHandler.out_path
@@ -73,9 +65,9 @@ class InitProcessingState:
             transcriptions_vol.commit()
             audio_storage_vol.commit()
 
-        if (audiofile is not None):
+        if audiofile is not None:
             # save audiofile
-            pass
+            logger.info("Audiofile parameter provided but not implemented")
 
         if chained:
             await self._next_state().run_job(vid)
@@ -88,7 +80,6 @@ class InitProcessingState:
 class FailedProcessingState:
     def __init__(self) -> None:
         self.StateSymbol = "Failed"
-        pass
 
     def _next_state(self):
         return InitProcessingState()
@@ -96,4 +87,3 @@ class FailedProcessingState:
     def run_job(self, vid: str) -> None:
         # update new state on the output json
         updateOutputJson(vid, self.StateSymbol)
-        pass

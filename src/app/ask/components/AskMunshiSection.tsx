@@ -1,12 +1,13 @@
 "use client";
-import { createContext, useCallback, useReducer } from "react";
+import { useCallback } from "react";
 
 import SelectAudioCard from "./SelectAudioCard";
+import { SpeakerSettings } from "./SpeakerSettings";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { toast } from "@/lib/hooks/use-toast";
-import { FormStateContextProvider, useFormState } from "./form-state-provider";
-import { QueryClient, useMutation } from "@tanstack/react-query";
+import { FormStateContextProvider, useFormState } from "./FormStateProvider";
+import { useMutation } from "@tanstack/react-query";
 import { CircleNotchIcon } from "@phosphor-icons/react/dist/ssr";
 import Providers from "../../providers";
 import { MODAL_URL } from "@/lib/url";
@@ -17,10 +18,9 @@ export function AskMunishiSection() {
             <Providers>
                 <FormStateContextProvider>
                     <div className="relative flex w-full max-w-[1080px] flex-col items-center justify-center">
-                        <div className="flex min-h-fit w-full max-w-2xl flex-col gap-5 pt-20 lg:flex-row lg:justify-center">
-                            <div className="h-full w-full max-w-[1080px] flex-1">
-                                <SelectAudioCard className="transition-all duration-200" />
-                            </div>
+                        <div className="flex min-h-fit w-full max-w-2xl flex-col gap-5">
+                            <SelectAudioCard className="transition-all duration-200" />
+                            <SpeakerSettings />
                         </div>
                         <div className="relative w-full flex-initial">
                             <TranscribeButton />
@@ -37,9 +37,11 @@ function TranscribeButton() {
     const url = MODAL_URL + "/transcribe_local";
 
     const { mutate, isPending, isSuccess, isError, isIdle } = useMutation({
-        mutationFn: (vid: string) => {
+        mutationFn: (params: { vid: string; enableSpeakers: boolean; numSpeakers: number }) => {
             const payload = JSON.stringify({
-                vid,
+                vid: params.vid,
+                enable_speakers: params.enableSpeakers,
+                num_speakers: params.numSpeakers,
             });
             return fetch(url, {
                 method: "POST",
@@ -71,7 +73,7 @@ function TranscribeButton() {
             window.history.pushState(
                 { id: "output-page" },
                 `output-page`,
-                `/output/${context}`,
+                `/output/${variables.vid}`,
             );
             window.history.go();
         },
@@ -81,7 +83,11 @@ function TranscribeButton() {
     });
 
     const onSubmit = useCallback(async () => {
-        mutate(formState?.id!);
+        mutate({
+            vid: formState?.id!,
+            enableSpeakers: formState?.enableSpeakers!,
+            numSpeakers: formState?.numSpeakers!,
+        });
     }, [formState, mutate]);
     return (
         <>
@@ -91,7 +97,7 @@ function TranscribeButton() {
                     onClick={() => {
                         onSubmit();
                     }}
-                    className="mt-5 !w-full max-w-lg font-heading disabled:cursor-not-allowed"
+                    className="w-full transition-all duration-200 mt-5 max-w-lg font-heading disabled:cursor-not-allowed"
                 >
                     {(isIdle || isError) && `Transcribe`}
                     {(isPending || isSuccess) && (

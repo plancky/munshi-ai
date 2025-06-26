@@ -1,64 +1,122 @@
 import google.generativeai as genai
-from google.generativeai import caching
 import os, datetime, asyncio, aiohttp
-from .utils import updateOutputJson, output_handler
+from ..utils import updateOutputJson, output_handler
 
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 GEMINI_MODEL = "gemini-1.5-flash"
 
 
 async def ask_gemini(*inputs):
+    """Async Gemini API call with improved error handling and configuration"""
     model = genai.GenerativeModel(GEMINI_MODEL)
     try:
         response = model.generate_content(
             inputs,
             generation_config=genai.types.GenerationConfig(
-                # Only one candidate for now.
-                # candidate_count=1,
-                # max_output_tokens=8192,
-                temperature=1.0,
+                temperature=0.3,  # Lower temperature for transcript cleaning
+                max_output_tokens=8192,
             ),
             request_options={"timeout": 240},
         )
         return response.text
     except Exception as E:
-        return "Error"
+        print(f"Gemini API Error in transcript cleaning: {E}")
+        return "Error processing transcript chunk"
 
 
+async def clean_transcript(text):
+    """Clean transcript using chunking and parallel processing"""
+    from ..gemini_prompts import clean_transcript_prompt
+
+    # Split transcript into manageable chunks
+    chunks = split_string_by_max_tokens(text, max_tokens=6000)  # Reduced for better quality
+    
+    # Process chunks in parallel with improved error handling
+    tasks = [ask_gemini(clean_transcript_prompt, chunk) for chunk in chunks]
+    try:
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Filter out errors and join successful results
+        cleaned_chunks = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                print(f"Error processing chunk {i}: {result}")
+                # Use original chunk if cleaning fails
+                cleaned_chunks.append(chunks[i])
+            else:
+                cleaned_chunks.append(result)
+        
+        return ' '.join(cleaned_chunks)
+    except Exception as e:
+        print(f"Error in transcript cleaning: {e}")
+        return text  # Return original text if all cleaning fails
+
+
+def split_string_by_max_tokens(text, max_tokens, encoding_name="cl100k_base"):
+    """
+    Splits a string into chunks with a maximum number of tokens.
+    Improved to maintain sentence boundaries when possible.
+    """
+    import tiktoken
+    import re
+
+    encoding = tiktoken.get_encoding(encoding_name)
+    chunks = []
+    current_chunk = ""
+    current_chunk_tokens = 0
+
+    # Split by sentences first to maintain coherence
+    sentences = re.split(r'(?<=[.!?])\s+', text)
+    
+    for sentence in sentences:
+        sentence_tokens = len(encoding.encode(sentence))
+        
+        # If single sentence exceeds max_tokens, split by tokens
+        if sentence_tokens > max_tokens:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+                current_chunk = ""
+                current_chunk_tokens = 0
+            
+            # Split long sentence by tokens
+            tokens = encoding.encode(sentence)
+            for i in range(0, len(tokens), max_tokens):
+                chunk_tokens = tokens[i:i + max_tokens]
+                chunks.append(encoding.decode(chunk_tokens))
+        
+        # If adding sentence would exceed limit, save current chunk
+        elif current_chunk_tokens + sentence_tokens > max_tokens:
+            if current_chunk:
+                chunks.append(current_chunk.strip())
+            current_chunk = sentence + " "
+            current_chunk_tokens = sentence_tokens
+        
+        # Add sentence to current chunk
+        else:
+            current_chunk += sentence + " "
+            current_chunk_tokens += sentence_tokens
+
+    # Add final chunk if exists
+    if current_chunk:
+        chunks.append(current_chunk.strip())
+
+    return chunks
+
+
+# Legacy functions kept for compatibility
 def summarize(transcript_text, vid):
+    """Legacy function for backward compatibility"""
     import tempfile
-
-    print(os.getcwd())
-    from .gemini_prompts import clean_transcript_prompt
+    from ..gemini_prompts import clean_transcript_prompt
     import pathlib
 
     _p = pathlib.Path(__file__).parent.resolve()
     fp = tempfile.NamedTemporaryFile(delete=False, suffix=".txt")
     fp.write(transcript_text.encode())
-    # document = genai.upload_file(path=f"{_p}/test.txt", mime_type="text/plain")
-    print(transcript_text.encode())
-    print(fp.read())
-    document = genai.upload_file(path=fp.file, mime_type="text/plain")
     fp.close()
 
-    response = ask_gemini(clean_transcript_prompt, transcript_text)
-
-    """
-    cache = caching.CachedContent.create(
-        model=f"models/{GEMINI_MODEL}",
-        display_name=f"{vid}",  # used to identify the cache
-        system_instruction=(
-            clean_transcript_prompt
-        ),
-        contents=[document],
-        ttl=datetime.timedelta(minutes=5),
-    )
-    transcript_model = genai.GenerativeModel.from_cached_content(cached_content=cache)
-    response = transcript_model.generate_content(
-        "Give me the cleaned transcript"
-    )
-    """
-
+    # Use asyncio.run for the async function
+    response = asyncio.run(ask_gemini(clean_transcript_prompt, transcript_text))
     return response
 
 
@@ -82,55 +140,9 @@ async def main1():
             print(result)
 
 
-async def clean_transcript(text):
-    from .gemini_prompts import clean_transcript_prompt
-
-    chunks = split_string_by_max_tokens(text, max_tokens=7000)
-
-    tasks = [ask_gemini(clean_transcript_prompt, chunk) for chunk in chunks]
-    res = await asyncio.gather(*tasks)
-
-    return ' '.join(res)
-
-
-def split_string_by_max_tokens(text, max_tokens, encoding_name="cl100k_base"):
-    import tiktoken
-
-    """
-    Splits a string into chunks with a maximum number of tokens.
-
-    Args:
-        text: The input string.
-        max_tokens: The maximum number of tokens per chunk.
-        encoding_name: The name of the tiktoken encoding to use.
-
-    Returns:
-        A list of string chunks.
-    """
-
-    encoding = tiktoken.get_encoding(encoding_name)
-    chunks = []
-    current_chunk = ""
-    current_chunk_tokens = 0
-
-    for token in encoding.encode(text):
-        if current_chunk_tokens + 1 > max_tokens:
-            chunks.append(current_chunk.strip())
-            current_chunk = ""
-            current_chunk_tokens = 0
-
-        current_chunk += encoding.decode([token])
-        current_chunk_tokens += 1
-
-    if current_chunk:
-        chunks.append(current_chunk.strip())
-
-    return chunks
-
-
 if __name__ == "__main__":
     import pathlib
-    from .gemini_prompts import clean_transcript_prompt
+    from ..gemini_prompts import clean_transcript_prompt
 
     async def main():
         _p = pathlib.Path(__file__).parent.resolve()

@@ -1,22 +1,11 @@
-from urllib.parse import urlparse, parse_qs
+
 from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR
 import pathlib
 import json
 
 from .. import config
 
-# Logger
 logger = config.get_logger("UTILS")
-
-
-def get_vid_from_url(url: str) -> str:
-    return parse_qs(urlparse(url).query)["v"][0]
-
-
-def get_url_from_vid(vid: str) -> str:
-    if vid.startswith("local_"):
-        return ""
-    return f"https://www.youtube.com/watch?v={vid}"
 
 
 def audio_path(vid: str) -> pathlib.Path:
@@ -41,7 +30,6 @@ def updateOutputJsonDict(vid: str, fieldsDict):
 
 MUNSHI_TRANSCRIPTION_STATUS = {
     "initiated": "initiated",
-    "downloading_audio": "downloading_audio",
     "transcribing": "transcribing",
     "completed": "completed",
 }
@@ -53,27 +41,8 @@ class output_handler:
         self.out_path = f"{TRANSCRIPTIONS_DIR}/{vid}.json"
         self.audio_path = f"{RAW_AUDIO_DIR}/{vid}.mp3"
         self.get_output()
-        pass
 
-    def next_status(self):
-        _states = list(MUNSHI_TRANSCRIPTION_STATUS.keys())
-        self.status = MUNSHI_TRANSCRIPTION_STATUS[
-            _states[_states.index(self.status) + 1]
-        ]
-        self.write_transcription_data()
 
-    def initiate(self):
-        if not pathlib.Path(self.out_path).exists():
-            logger.log(
-                f"Output file doesn't exist, initiating new output file {self.out_path}"
-            )
-            self.status = "Init"
-            self.data = {}
-            self.write_transcription_data()
-            logger.log(f"Initiated new output file {self.out_path}")
-            pass
-        else:
-            self.get_output()
 
     def write_output_data(self, data):
         self.data = data
@@ -93,7 +62,6 @@ class output_handler:
                 ensure_ascii=False,
                 indent=4,
             )
-        pass
 
     def get_output(self):
         if not pathlib.Path(self.out_path).exists():
@@ -109,5 +77,31 @@ class output_handler:
         return 0
 
 
+def store_speaker_settings(vid: str, enable_speakers: bool, num_speakers: int):
+    """Store speaker settings for a given video ID."""
+    outputHandler = output_handler(vid)
+    speaker_settings = {
+        "enable_speakers": enable_speakers,
+        "num_speakers": num_speakers
+    }
+    outputHandler.update_field("speaker_settings", speaker_settings)
+    outputHandler.write_transcription_data()
+    logger.info(f"Stored speaker settings for {vid}: {speaker_settings}")
+
+
+def get_speaker_settings(vid: str):
+    """Retrieve speaker settings for a given video ID."""
+    outputHandler = output_handler(vid)
+    speaker_settings = outputHandler.output.get("speaker_settings", {})
+    
+    # Default values if not found
+    enable_speakers = speaker_settings.get("enable_speakers", True)
+    num_speakers = speaker_settings.get("num_speakers", 2)
+    
+    logger.info(f"Retrieved speaker settings for {vid}: enable={enable_speakers}, num={num_speakers}")
+    return enable_speakers, num_speakers
+
+
 if __name__ == "__main__":
-    print(get_vid_from_url("https://www.youtube.com/watch?v=tAGnKpE4NCI"))
+    print("Testing local file ID...")
+    print(get_vid_from_url("local_test123"))

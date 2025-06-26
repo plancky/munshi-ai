@@ -13,6 +13,8 @@ export type FormState = {
     audioFile?: AudioFileState;
     isUploaded: boolean;
     id?: string;
+    enableSpeakers: boolean;
+    numSpeakers: number;
 };
 
 // Define Action "types" on FormState
@@ -22,6 +24,7 @@ export enum FormStateActionTypes {
     REMOVE_AUDIO_FILE = "remove_audio_file",
     UPLOADED = "uploaded",
     OVERWRITE = "overwrite",
+    SET_SPEAKER_SETTINGS = "set_speaker_settings",
 }
 
 type MutateAudioSelectMethodAction = {
@@ -56,12 +59,21 @@ type OverWriteState = {
     payload: FormState;
 };
 
+type SetSpeakerSettingsAction = {
+    type: FormStateActionTypes.SET_SPEAKER_SETTINGS;
+    payload: {
+        enableSpeakers: boolean;
+        numSpeakers: number;
+    };
+};
+
 export type FormStateReducerActions =
     | MutateAudioSelectMethodAction
     | AddAudioAction
     | RmAudioAction
     | UploadedAudioAction
-    | OverWriteState;
+    | OverWriteState
+    | SetSpeakerSettingsAction;
 
 // Reducer
 export function audioSelectReducer(
@@ -111,6 +123,16 @@ export function audioSelectReducer(
             saveState(new_state);
             return new_state;
 
+        case FormStateActionTypes.SET_SPEAKER_SETTINGS:
+            const { enableSpeakers, numSpeakers } = payload;
+            const updated_state = {
+                ...state,
+                enableSpeakers,
+                numSpeakers,
+            };
+            saveState(updated_state);
+            return updated_state;
+
         default:
             return { ...state, ...payload };
             break;
@@ -127,10 +149,17 @@ interface StoredStateObj extends FormState {
 
 export function saveState(state: FormState) {
     if (!localStorage) return;
+    
+    // Don't save state if there's no actual file object
+    // This prevents stale metadata-only states
+    if (!state?.audioFile?.file) {
+        localStorage.removeItem("formState");
+        return;
+    }
+    
     const obj: StoredStateObj = { ...state };
     if (state?.audioFile?.file) {
         obj.audioFileStored = {
-            //file: URL.createObjectURL(state.audioFile.file),
             metadata: state.audioFile?.metadata,
         };
         delete obj.audioFile;
@@ -144,6 +173,14 @@ export function retrieveState<T>() {
     if (!itemString) return null;
 
     const storedState: StoredStateObj = JSON.parse(itemString);
+    
+    // Since File objects can't be persisted, and we only show metadata without files,
+    // it's better to start fresh to avoid confusing UX
+    if (storedState?.audioFileStored && !storedState?.audioFile?.file) {
+        localStorage.removeItem("formState");
+        return null;
+    }
+
     const state = { ...storedState };
 
     if (storedState?.audioFileStored) {
