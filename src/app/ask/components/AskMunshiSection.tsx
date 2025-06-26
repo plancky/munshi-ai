@@ -91,7 +91,7 @@ function TranscribeButton() {
                     onClick={() => {
                         onSubmit();
                     }}
-                    className="mt-5 !w-full max-w-lg font-heading disabled:cursor-not-allowed"
+                    className="w-full transition-all duration-200 mt-5 max-w-lg font-heading disabled:cursor-not-allowed"
                 >
                     {(isIdle || isError) && `Transcribe`}
                     {(isPending || isSuccess) && (

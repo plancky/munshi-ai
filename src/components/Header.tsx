@@ -20,7 +20,7 @@ export default function Header() {
     return (
         <div className="full-width relative z-10">
             <header className="full-width fixed w-full py-8 lg:bg-transparent">
-                <div className="flex items-center justify-between rounded-lg bg-primary bg-opacity-40 px-4 py-3 backdrop-blur-lg">
+                <div className="flex items-center justify-between rounded-lg bg-white/80 backdrop-blur-xl border border-border shadow-sm px-4 py-3">
                     <a href="/" className="flex items-center gap-2">
                         <span className="font-normal">
                             <Logo className="h-10" />

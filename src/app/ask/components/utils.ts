@@ -12,7 +12,6 @@ export async function uploadFileInChunks(
     progressBar: HTMLDivElement | null,
 ) {
     const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-    const uploadPromises: Promise<Response>[] = [];
     let uploadedChunks = 0;
     let fileId;
 
@@ -25,9 +24,9 @@ export async function uploadFileInChunks(
         formData.append("chunk", chunk);
         formData.append("chunkIndex", i.toString());
         formData.append("totalChunks", totalChunks.toString());
-        //formData.append("metadata", metadata);
         formData.append("fileName", file.name);
-
+        formData.append("metadata", JSON.stringify(metadata));
+        
         try {
             const response = await fetch(uploadUrl, {
                 method: "POST",

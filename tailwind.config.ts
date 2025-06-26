@@ -27,8 +27,8 @@ const config: Config = {
     theme: {
         extend: {
             fontFamily: {
-                primary: "var(--font-primary)",
-                heading: "var(--font-heading)",
+                primary: "var(--font-inter)",
+                heading: "var(--font-inter)",
             },
             fontSize: genFontSizes({
                 "2xl": ["3.5rem", "1.2", "-0.3%", "400"],
