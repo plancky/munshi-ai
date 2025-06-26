@@ -1,7 +1,5 @@
 import { Metadata } from "next";
-import PricingSection from "@/components/PricingSection";
 import HeroSection from "@/components/HeroSection";
-import FeaturesSection from "@/components/FeaturesSection";
 
 export const metadata: Metadata = {
     title: "Munshi | Home",

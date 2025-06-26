@@ -1,73 +1,42 @@
-import { Button, buttonVariants } from "./ui/button";
 import Logo from "@/logo/logo.svg?inline";
-
-import {
-    Drawer,
-    DrawerTrigger,
-    DrawerFooter,
-    DrawerHeader,
-    DrawerContent,
-    DrawerTitle,
-    DrawerDescription,
-    DrawerClose,
-    DrawerPortal,
-    DrawerOverlay,
-} from "@/components/ui/drawer";
-
-import { Icons } from "./icons/icons";
+import { SparkleIcon, MicrophoneIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function Header() {
     return (
-        <div className="full-width relative z-10">
-            <header className="full-width fixed w-full py-8 lg:bg-transparent">
-                <div className="flex items-center justify-between rounded-lg bg-primary bg-opacity-40 px-4 py-3 backdrop-blur-lg">
-                    <a href="/" className="flex items-center gap-2">
-                        <span className="font-normal">
-                            <Logo className="h-10" />
+        <div className="full-width relative z-50">
+            <header className="full-width fixed w-full py-4">
+                <div className="flex items-center justify-between rounded-xl backdrop-blur-lg border border-white/20 shadow-lg px-4 py-3 transition-all duration-300 hover:bg-white/80">
+                    <a href="/" className="flex items-center gap-3 group">
+                        <span className="font-normal transition-transform duration-200 group-hover:scale-105">
+                            <Logo className="h-8" />
                         </span>
-                        <span className="hidden font-heading text-subheading_lg lg:block">
+                        <span className="hidden font-heading text-base font-medium text-foreground lg:block">
                             Munshi
                         </span>
                     </a>
-                    <div className="flex">
-                        <Drawer direction="right">
-                            <DrawerPortal>
-                                <DrawerOverlay className="fixed inset-0 bg-black/40" />
-                                <DrawerContent className="right-[-100px] h-full w-full rounded-none bg-destructive text-primary-foreground [&>div:first-child]:hidden">
-                                    <div className="">
-                                        <DrawerHeader>
-                                            <DrawerTitle className="pt-5">
-                                                <div className="flex justify-between">
-                                                    <div className="flex items-center gap-2 text-2xl font-normal text-primary-foreground">
-                                                        <span className="font-normal">
-                                                            <Logo className="h-10" />
-                                                        </span>
-                                                        <span>Munshi</span>
-                                                    </div>
-                                                    <DrawerClose>
-                                                        <Button
-                                                            variant="destructive"
-                                                            className="rounded-none"
-                                                        >
-                                                            X
-                                                        </Button>
-                                                    </DrawerClose>
-                                                </div>
-                                            </DrawerTitle>
-                                            <DrawerDescription className="pt-20 text-primary-foreground"></DrawerDescription>
-                                        </DrawerHeader>
-                                        <DrawerFooter>
-                                            <Button className="hidden">
-                                                Try Munshi
-                                            </Button>
-                                        </DrawerFooter>
-                                    </div>
-                                </DrawerContent>
-                            </DrawerPortal>
-                        </Drawer>
+                    
+                    <div className="flex items-center gap-4">
+                        {/* Quick Actions */}
+                        <div className="flex items-center gap-2">
+                            <a 
+                                href="/ask" 
+                                className="flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/50"
+                            >
+                                <MicrophoneIcon className="w-4 h-4" />
+                                <span className="hidden sm:block">Transcribe</span>
+                            </a>
+                            
+                            <div className="w-px h-5 bg-border" />
+                            
+                            <div className="flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground bg-white/30 rounded-md">
+                                <SparkleIcon className="w-3 h-3" />
+                                <span className="hidden sm:block">AI-powered</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
         </div>
     );
 }
+

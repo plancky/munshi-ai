@@ -2,7 +2,7 @@
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import LoadingUI from "./LoadingUI";
 import TranscriptCard from "./TranscriptCard";
-import { dataFetchOptions } from "./data-fetch-options";
+import { dataFetchOptions } from "./DataFetchOptions";
 import { STATUS_CODES } from "http";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 

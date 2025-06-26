@@ -1,31 +1,50 @@
 import { MODAL_URL } from "@/lib/url";
 
-export function getSummary(id: string) {
-    const payload = JSON.stringify({
-        vid: id,
-    });
-
-    return fetch(MODAL_URL + "/summarize", {
-        method: "POST",
-        body: payload,
-        headers: {
-            "Content-Type": "application/json",
-        },
-    })
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw Error("Something went wrong.");
-            }
-        })
-        .then((data) => {
-            console.log("Success:", data);
-            return { data, error: null };
-        })
-        .catch((error) => {
-            console.error("Error:", error);
-            throw Error("Something went wrong.");
-            return { error, data: null };
+export async function getSummary(vid: string) {
+    try {
+        const res = await fetch(`${MODAL_URL}/summarize`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ vid }),
         });
+        
+        if (!res.ok) {
+            throw new Error(`Failed to get summary: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        return data;
+    } catch (error) {
+        console.error("Error getting summary:", error);
+        throw error;
+    }
+}
+
+export async function updateSpeakerMappings(vid: string, speakerMappings: Record<string, string>) {
+    try {
+        const res = await fetch(`${MODAL_URL}/update_speakers`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ 
+                vid, 
+                speaker_mappings: speakerMappings 
+            }),
+        });
+        
+        if (!res.ok) {
+            throw new Error(`Failed to update speakers: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        
+        // Let React Query handle refetching - no need for page reload
+        return data;
+    } catch (error) {
+        console.error("Error updating speaker mappings:", error);
+        throw error;
+    }
 }

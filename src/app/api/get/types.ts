@@ -4,7 +4,10 @@ export interface ModedOutputDataObject {
     text: string;
     language: string;
     summary_gemini: string;
+    speaker_transcript?: string;
+    speaker_mappings?: Record<string, string>;
     paras?: string[];
+    speaker_paras?: string[];
 }
 
 export interface ModedOutputObject extends OutputObject {

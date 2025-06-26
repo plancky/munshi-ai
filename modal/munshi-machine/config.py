@@ -55,11 +55,20 @@ BASE_PYTHON_PACKAGES = [
 ]
 
 ML_PYTHON_PACKAGES = [
-    "transformers==4.53.0",
-    "ninja",
-    "hf-transfer==0.1",
+    #"transformers==4.53.0",
+    # Core PyTorch - using newer versions but keeping compatibility
     "torch==2.7.1",
-    # "torchvision==0.21.0",
+    "torchaudio==2.7.1",  # Added - needed for audio processing
+    "numpy<2.0",  # Changed to match blog constraint
+    
+    # WhisperX and dependencies
+    "git+https://github.com/m-bain/whisperx.git@v3.2.0",
+    "ctranslate2==4.4.0",
+    
+    # Additional optimizations (keeping our enhancements)
+    "ninja",
+    "hf-transfer~=0.1", 
+    "pyannote.audio==3.1.1",  # Speaker diarization
 ]
 
 PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES
@@ -69,6 +78,3 @@ APT_PACKAGES = [
     "git",
     "ffmpeg",
 ]
-
-# Cobalt Api url
-COBALT_API_URL = "https://munshi-cobalt-759838166088.asia-south2.run.app"

@@ -3,8 +3,7 @@ from modal import asgi_app
 from .volumes import transcriptions_vol, audio_storage_vol
 from . import config
 from .functions.api import web_app
-from .images import base_image
-import modal, os
+import modal
 
 
 # Mount FastApi web api app
@@ -16,7 +15,7 @@ import modal, os
     secrets=[custom_secret],
     max_containers=4,
     scaledown_window=200,
-    timeout=200,
+    timeout=2000,
 )
 @modal.concurrent(max_inputs=100)
 @asgi_app()
@@ -27,14 +26,8 @@ def entrypoint():
 # Local entrypoint for testing
 @app.local_entrypoint()
 def main():
-    from .functions.functions import get_audio, init_transcription, delete_cache
-    from .lib.utils import get_vid_from_url
+    from .functions.functions import init_transcription
 
-    url = "https://www.youtube.com/watch?v=Ng7LIRDhwwg"
-    audio = init_transcription.remote(url)
+    test_id = "local_test123"
+    audio = init_transcription.remote(test_id)
     print(audio)
-    """
-    Delete cache for a given vid
-    delete = delete_cache.remote(get_vid_from_url(url), "f")
-    print(delete)
-    """

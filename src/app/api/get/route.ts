@@ -1,10 +1,10 @@
 import { MODAL_URL } from "@/lib/url";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { cleanSummaryHtmlString, formatTranscriptInParagraphs } from "./utils";
+import { cleanSummaryHtmlString, formatTranscriptInParagraphs, formatSpeakerTranscriptInParagraphs } from "./utils";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 import { OutputObject } from "@/shared/types";
-import { ModedOutputDataObject, ModedOutputObject } from "./types";
+import { ModedOutputObject } from "./types";
 
 const NEXT_CACHE_OUTPUT_TAG = (id: string) => `output_${id}`;
 
@@ -27,19 +27,17 @@ export async function GET(req: NextRequest) {
         const dataObject = modedResObject?.data;
 
         if (typeof dataObject !== "undefined") {
-            const { summary_gemini: summary, text } = dataObject;
+            const { summary_gemini: summary, text, speaker_transcript } = dataObject;
             if (summary) {
                 dataObject.summary_gemini = cleanSummaryHtmlString(summary);
             }
             if (text) {
                 dataObject.paras = formatTranscriptInParagraphs(text, 200);
             }
+            if (speaker_transcript) {
+                dataObject.speaker_paras = formatSpeakerTranscriptInParagraphs(speaker_transcript, 120);
+            }
         }
-
-        console.log(
-            modedResObject?.status,
-            modedResObject?.metadata
-        );
 
         return NextResponse.json(modedResObject, { status: 200 });
     } catch (e) {

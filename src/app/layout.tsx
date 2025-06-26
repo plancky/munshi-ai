@@ -1,24 +1,16 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans_Thai, Exo_2 } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 import Backdrop from "@/components/backdrop.svg?inline";
 import { Toaster } from "../components/ui/toaster";
 
-const Exo2Font = Exo_2({
-    weight: ["100", "300", "400", "700"],
-    style: ["normal", "italic"],
-    subsets: ["latin"],
-    display: "swap",
-    variable: "--font-heading",
-});
-
-const IBMPlexSans = IBM_Plex_Sans_Thai({
-    weight: ["200", "400", "700"],
+const inter = Inter({
+    weight: ["400", "500", "700"],
     style: ["normal"],
     subsets: ["latin"],
     display: "swap",
-    variable: "--font-primary",
+    variable: "--font-inter",
 });
 
 export const metadata: Metadata = {
@@ -35,17 +27,11 @@ export default function RootLayout({
         <html lang="en">
             <head />
             <body
-                className={`${IBMPlexSans.variable} ${Exo2Font.variable} dark font-primary antialiased`}
+                className={`${inter.variable} font-primary antialiased`}
             >
-                <div
-                    id="backdrop"
-                    className="fixed -z-10 h-[100dvh] w-[100dvw] overflow-hidden opacity-15"
-                >
-                    <Backdrop />
-                </div>
-                <div className="content-grid relative z-0 min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+                <div className="relative min-h-[100dvh]">
                     <Header />
-                    <main>{children}</main>
+                    <main className="pt-32">{children}</main>
                 </div>
                 <Toaster />
             </body>
