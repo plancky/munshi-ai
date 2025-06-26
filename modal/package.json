@@ -1,0 +1,17 @@
+{
+    "scripts": {
+        "env": ". ./activate",
+        "dev": "modal serve -m munshi-machine.entrypoint",
+        "run": "modal run -m munshi-machine.entrypoint",
+        "deploy": "modal deploy -m munshi-machine.entrypoint",
+        "profiles": "modal profile list",
+        "secret:list": "modal secret list",
+        "secret:create": "modal secret create",
+        "secret:delete": "modal secret delete",
+        "vol:list": "modal volume list",
+        "vol:get": "modal volume get",
+        "build": "",
+        "test": "",
+        "clean": ""
+    }
+}

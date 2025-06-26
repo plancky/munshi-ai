@@ -26,6 +26,7 @@ __pycache__
 #other
 apikey.sh
 modal/*
+!modal/package.json
 !modal/munshi-machine/
 
 # debug
