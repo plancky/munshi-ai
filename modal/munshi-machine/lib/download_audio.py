@@ -139,7 +139,7 @@ def get_metadata(vid):
 
     audio = EasyID3(path)
     logger.info(f"Found ID3 tags: {audio}")
-    return {"title": audio["title"], "author": audio["artist"]}
+    return {"title": audio.get("title", None), "author": audio.get("artist", None)}
 
 
 if __name__ == "__main__":

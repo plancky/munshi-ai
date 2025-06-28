@@ -55,11 +55,11 @@ BASE_PYTHON_PACKAGES = [
 ]
 
 ML_PYTHON_PACKAGES = [
-    "transformers==4.36.2",
+    "transformers==4.53.0",
     "ninja",
-    "hf-transfer~=0.1",
-    "torch==2.6.0",
-    "torchvision==0.21.0",
+    "hf-transfer==0.1",
+    "torch==2.7.1",
+    # "torchvision==0.21.0",
 ]
 
 PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES

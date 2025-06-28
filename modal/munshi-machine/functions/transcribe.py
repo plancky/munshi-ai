@@ -38,7 +38,7 @@ class WhisperV3:
         processor = AutoProcessor.from_pretrained(MODEL_DIR)
 
         self.generate_kwargs = {
-            "task": "translate",
+            #"task": "translate",
             "return_timestamps": True,
             "num_beams": 1,  # on beam only (greedy decoding, forces determinism)
             # "max_new_tokens": 256,
@@ -46,7 +46,7 @@ class WhisperV3:
             # "compression_ratio_threshold": float("inf"),  # Disable filtering retries
             # "compression_ratio_threshold": 1.35,  # zlib compression ratio threshold (in token space)
             # "logprob_threshold": -float("inf"),  # Disable filtering retries
-            "no_speech_threshold": 0.0,  # Forces decoding even if no speech detected
+            #"no_speech_threshold": 0.0,  # Forces decoding even if no speech detected
         }
 
         self.pipe = pipeline(
