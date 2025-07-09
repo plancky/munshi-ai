@@ -25,8 +25,6 @@ def get_logger(name, level=logging.INFO):
 MODEL_DIR = "/model"
 
 CACHE_DIR = "/cache"
-# Where downloaded podcasts are stored, by guid hash.
-# Mostly .mp3 files 50-100MiB.
 RAW_AUDIO_DIR = pathlib.Path(CACHE_DIR, "raw_audio")
 
 UPLOAD_CHUNK_DIR = pathlib.Path(CACHE_DIR, "chunks")
@@ -58,17 +56,17 @@ ML_PYTHON_PACKAGES = [
     #"transformers==4.53.0",
     # Core PyTorch - using newer versions but keeping compatibility
     "torch==2.7.1",
-    "torchaudio==2.7.1",  # Added - needed for audio processing
-    "numpy<2.0",  # Changed to match blog constraint
+    "torchaudio==2.7.1",
+    "numpy==2.0.2",
     
     # WhisperX and dependencies
-    "git+https://github.com/m-bain/whisperx.git@v3.2.0",
+    "git+https://github.com/m-bain/whisperx.git@v3.4.0",
     "ctranslate2==4.4.0",
     
-    # Additional optimizations (keeping our enhancements)
+    # Additional optimizations
     "ninja",
     "hf-transfer~=0.1", 
-    "pyannote.audio==3.1.1",  # Speaker diarization
+    "pyannote.audio==3.3.2",
 ]
 
 PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES
@@ -76,5 +74,5 @@ PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES
 
 APT_PACKAGES = [
     "git",
-    "ffmpeg",
+    "ffmpeg"
 ]

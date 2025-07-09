@@ -98,17 +98,22 @@ class TranscribingProcessingState:
                 output_data, time_elapsed = model.transcribe_and_diarize.remote(
                     str(audiofile_path),
                     min_speakers=1,
-                    max_speakers=min(10, max(num_speakers + 2, 5))
+                    max_speakers=min(10, max(num_speakers + 2, 5)),
+                    enable_speakers=True,
+                    num_speakers=num_speakers
                 )
             else:
                 # No speakers - just transcribe
                 output_data, time_elapsed = model.transcribe_and_diarize.remote(
                     str(audiofile_path),
                     min_speakers=1,
-                    max_speakers=1
+                    max_speakers=1,
+                    enable_speakers=False,
+                    num_speakers=1
                 )
                 # Remove speaker info for non-speaker mode
                 output_data["speaker_transcript"] = output_data["text"]
+                logger.info(f"[TRANSCRIBE_RAW] vid={vid} text_len={len(output_data['text']) if output_data.get('text') else 0} sample={output_data['text'][:200] if output_data.get('text') else ''}")
             
             logger.info(f"Transcription completed in {time_elapsed:.2f}s")
             
@@ -119,12 +124,11 @@ class TranscribingProcessingState:
             # Clean regular transcript
             if output_data.get("text"):
                 output_data["text"] = await get_cleaned_transcript(output_data["text"])
+                logger.info(f"[TRANSCRIBE_CLEANED] vid={vid} cleaned_text_len={len(output_data['text']) if output_data.get('text') else 0} sample={output_data['text'][:200] if output_data.get('text') else ''}")
             
-            # Clean speaker transcript and parse mappings
-            if output_data.get("speaker_transcript") and output_data["speaker_transcript"] != output_data.get("text"):
-                logger.info(f"DEBUG: Speaker transcript before Gemini: {output_data['speaker_transcript']}")
+            # Clean speaker transcript and parse mappings ONLY if speakers are enabled
+            if enable_speakers and output_data.get("speaker_transcript") and output_data["speaker_transcript"] != output_data.get("text"):
                 cleaned_speaker_transcript = await get_cleaned_speaker_transcript(output_data["speaker_transcript"])
-                logger.info(f"DEBUG: Speaker transcript after Gemini: {cleaned_speaker_transcript}")
                 # Parse speaker mappings from cleaned transcript
                 clean_transcript, speaker_mappings = parse_speaker_mappings(cleaned_speaker_transcript)
                 output_data["speaker_transcript"] = clean_transcript
@@ -132,6 +136,10 @@ class TranscribingProcessingState:
                     output_data["speaker_mappings"] = speaker_mappings
                     logger.info(f"Detected speaker mappings: {speaker_mappings}")
                 logger.info(f"DEBUG: Final speaker_transcript to be written: {output_data['speaker_transcript']}")
+            elif not enable_speakers:
+                # When speakers are disabled, speaker_transcript should match the cleaned text
+                output_data["speaker_transcript"] = output_data["text"]
+                logger.info("Speakers disabled - speaker_transcript set to match cleaned text")
             
             logger.info("Transcript cleaning completed")
             

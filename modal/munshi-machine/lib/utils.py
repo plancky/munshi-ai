@@ -1,4 +1,3 @@
-
 from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR
 import pathlib
 import json
@@ -40,9 +39,11 @@ class output_handler:
         self.vid = vid
         self.out_path = f"{TRANSCRIPTIONS_DIR}/{vid}.json"
         self.audio_path = f"{RAW_AUDIO_DIR}/{vid}.mp3"
+        # Initialize status to None, will be set by get_output()
+        self.status = None
+        self.data = None
+        self.output = {}
         self.get_output()
-
-
 
     def write_output_data(self, data):
         self.data = data
@@ -66,15 +67,23 @@ class output_handler:
     def get_output(self):
         if not pathlib.Path(self.out_path).exists():
             self.output = {}
+            self.status = "Not Found"  # Set status for missing files
+            self.data = None
             return -1
 
-        with open(self.out_path, "r", encoding="utf-8") as output_file:
-            _output = json.load(output_file)
-            self.status = _output.get("status")
-            self.data = _output.get("data", None)
-            self.output = _output
-
-        return 0
+        try:
+            with open(self.out_path, "r", encoding="utf-8") as output_file:
+                _output = json.load(output_file)
+                self.status = _output.get("status", "Unknown")
+                self.data = _output.get("data", None)
+                self.output = _output
+            return 0
+        except (json.JSONDecodeError, FileNotFoundError, Exception) as e:
+            logger.error(f"Error reading transcript file for {self.vid}: {e}")
+            self.output = {}
+            self.status = "Failed"  # Set status for corrupted/invalid files
+            self.data = None
+            return -1
 
 
 def store_speaker_settings(vid: str, enable_speakers: bool, num_speakers: int):
@@ -101,7 +110,3 @@ def get_speaker_settings(vid: str):
     logger.info(f"Retrieved speaker settings for {vid}: enable={enable_speakers}, num={num_speakers}")
     return enable_speakers, num_speakers
 
-
-if __name__ == "__main__":
-    print("Testing local file ID...")
-    print(get_vid_from_url("local_test123"))

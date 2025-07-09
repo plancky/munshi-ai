@@ -38,8 +38,8 @@ async def init_transcription(vid: str = None):
             await processingStateFactory(oh.status).run_job(vid)
 
     except Exception as E:
-        logger.info("Unkown error occured: ", E)
-        return "Unkown Error"
+        logger.info(f"Unknown error occurred: {E}")
+        return "Unknown Error"
 
 
 
