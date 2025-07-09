@@ -6,7 +6,7 @@ from .. import config
 
 # import modal functions and classes into this namespace for modal
 from .transcribe import WhisperX
-from .functions import init_transcription, gen_summary
+from .functions import init_transcription
 from ..lib.utils import output_handler
 
 from .middleware import add_cors
@@ -58,14 +58,8 @@ async def upload_file(
             totalChunks,
             fileName,
         )
-        
-        # Handle new return format: [success, fileId, is_existing]
-        if len(result) >= 3:
-            uploaded, fileId, is_existing = result[:3]
-        else:
-            # Fallback for old format
-            uploaded, fileId = result
-            is_existing = False
+
+        uploaded, fileId, is_existing = result[:3]
 
         if uploaded:
             if is_existing:
@@ -163,6 +157,8 @@ async def fetch_output(request: Request):
         transcriptions_vol.reload()
         oh = output_handler(vid)
         status, data, metadata = oh.status, oh.data, oh.get_metadata()
+        if data and data.get('text'):
+            logger.info(f"[FETCH_DATA] vid={vid} text_len={len(data['text'])} sample={data['text'][:200]}")
         pass
     except RuntimeError as Error:
         return responses.JSONResponse(
@@ -174,34 +170,6 @@ async def fetch_output(request: Request):
     return responses.JSONResponse(
         content={"status": status, "data": data, "metadata": metadata}, status_code=200
     )
-
-
-@web_app.post("/summarize")
-async def summarize(request: Request):
-    transcriptions_vol.reload()
-    logger.info(f"Received a request from {request.client}")
-
-    payload = await request.json()
-    try:
-        vid = payload["vid"]
-    except KeyError:
-        return responses.PlainTextResponse(
-            content="bad request. vid missing", status_code=400
-        )
-
-    try:
-        summary = await gen_summary.remote(vid)
-        pass
-
-    except RuntimeError as Error:
-        return responses.JSONResponse(
-            content={
-                "error": "Could not find transcription, You must transcript first."
-            },
-            status_code=406,
-        )
-
-    return responses.JSONResponse(content={"data": summary}, status_code=200)
 
 
 @web_app.post("/update_speakers")
@@ -245,6 +213,9 @@ async def update_speakers(request: Request):
             status_code=500
         )
 
+@web_app.get("/health")
+async def health():
+    return True
 
 if __name__ == "__main__":
     pass

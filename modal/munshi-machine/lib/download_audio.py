@@ -9,11 +9,6 @@ def get_stored_audio(path: str):
     return audio
 
 
-def download_audio(url: str):
-    logger.warning(f"Download attempted but not supported: {url}")
-    raise NotImplementedError("Audio download is no longer supported. Use local file upload instead.")
-
-
 def get_metadata(vid):
     try:
         from mutagen.easyid3 import EasyID3
@@ -30,7 +25,3 @@ def get_metadata(vid):
     except Exception as e:
         logger.warning(f"Could not extract metadata from {vid}: {e}")
         return {"title": None, "author": None}
-
-
-if __name__ == "__main__":
-    print("Audio download not supported. Use local file upload instead.")

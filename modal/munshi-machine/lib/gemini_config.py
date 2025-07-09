@@ -2,34 +2,34 @@
 
 # Model configurations
 GEMINI_MODELS = {
-    "primary": "gemini-2.5-flash",     # Latest and best price-performance model
-    "cleaning": "gemini-2.5-flash",    # Same model for consistency and performance
+    "primary": "gemini-2.0-flash",
+    "cleaning": "gemini-2.0-flash",
 }
 
 # Generation configurations for different tasks
 GENERATION_CONFIGS = {
     "summary": {
         "temperature": 0.7,
-        "max_output_tokens": 32768,    # Increased for comprehensive summaries
+        "max_output_tokens": 8000,
         "top_p": 0.9,
     },
     "cleaning": {
-        "temperature": 0.3,  # Lower temperature for consistent cleaning
-        "max_output_tokens": 65536,    # Match input capacity for full transcript preservation
+        "temperature": 0.3,
+        "max_output_tokens": 8000,    
         "top_p": 0.8,
     },
 }
 
 # Request timeouts (in seconds)
 REQUEST_TIMEOUTS = {
-    "summary": 180,
-    "cleaning": 240,
+    "summary": 600,
+    "cleaning": 600,
 }
 
 # Token limits for chunking
 TOKEN_LIMITS = {
-    "cleaning": 60000,   # Much larger chunks for better context in cleaning
-    "summary": 1000000,    # Massive chunks to preserve full context in summaries
+    "cleaning": 8000,
+    "summary": 800000,
 }
 
 # Quality thresholds

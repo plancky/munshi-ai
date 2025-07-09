@@ -412,12 +412,3 @@ async def get_cleaned_speaker_transcript(speaker_transcript):
     """Clean speaker transcript with smart speaker detection"""
     return await processor.get_cleaned_speaker_transcript(speaker_transcript)
 
-
-# Backward compatible function for any modules importing clean_transcript
-async def clean_transcript(transcript_text):
-    """Legacy function for backward compatibility"""
-    return await processor.get_cleaned_transcript(transcript_text)
-
-
-if __name__ == "__main__":
-    print(ask_gemini("Hi gemini"))

@@ -24,8 +24,8 @@ def download_whisperx_models():
 Cuda Image to run transcribe function
 """
 cuda_image = (
-    Image.from_registry("nvidia/cuda:12.2.2-cudnn8-devel-ubuntu22.04", add_python="3.11")
-    .apt_install(*config.APT_PACKAGES)
+    Image.from_registry("nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04", add_python="3.11")
+    .apt_install(*config.APT_PACKAGES + ["libcudnn8", "libcudnn8-dev"])
     .pip_install(*config.PYTHON_PACKAGES)
     .run_commands("python -m pip install --upgrade pip wheel setuptools")
     .run_commands("MAX_JOBS=10 python -m pip install flash-attn --use-pep517 --no-build-isolation --verbose", gpu="A10G")

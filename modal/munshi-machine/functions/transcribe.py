@@ -1,7 +1,6 @@
 from modal import method, enter, exit as modal_exit
 import modal
 import os
-import tempfile
 
 from ..app import app
 from ..images import cuda_image
@@ -48,7 +47,7 @@ class WhisperX:
         )
         
         # Load diarization pipeline
-        self.diarize_model = whisperx.DiarizationPipeline(
+        self.diarize_model = whisperx.diarize.DiarizationPipeline(
             use_auth_token=os.environ.get("HF_TOKEN"),
             device=self.device
         )
@@ -56,8 +55,8 @@ class WhisperX:
         logger.info("✅ WhisperX setup complete")
 
     @method()
-    def transcribe_and_diarize(self, audio_file_path: str, min_speakers: int = 1, max_speakers: int = 10):
-        """Simple WhisperX pipeline: transcribe + align + diarize"""
+    def transcribe_and_diarize(self, audio_file_path: str, min_speakers: int = 1, max_speakers: int = 10, enable_speakers: bool = True, num_speakers: int = 1):
+        """Simple WhisperX pipeline: transcribe + align + diarize (optionally)"""
         import whisperx
         import time
         
@@ -67,6 +66,7 @@ class WhisperX:
         try:
             # Load and transcribe
             audio = whisperx.load_audio(audio_file_path)
+
             result = self.model.transcribe(audio, batch_size=self.batch_size)
             
             logger.info(f"📝 Raw transcription completed: {len(result.get('segments', []))} segments")
@@ -82,25 +82,27 @@ class WhisperX:
                 return_char_alignments=False
             )
             
-            # Assign speakers
-            diarize_segments = self.diarize_model(
-                audio_file_path,
-                min_speakers=min_speakers,
-                max_speakers=max_speakers
-            )
+            if enable_speakers:
+                # Assign speakers
+                diarize_segments = self.diarize_model(
+                    audio_file_path,
+                    num_speakers=num_speakers,
+                )
+                # Assign speakers to transcription
+                logger.info(f"🎭 Diarization completed: {len(diarize_segments)} speaker segments")
+                result = whisperx.assign_word_speakers(diarize_segments, 
+                                                       result,
+                                                       fill_nearest=True)
+                speaker_transcript = self._format_result(result, time.time() - start_time)
+            else:
+                # No diarization, just plain transcript
+                speaker_transcript = self._format_result(result, time.time() - start_time)
+                # Overwrite speaker_transcript to be just the text (no speaker labels)
+                speaker_transcript["speaker_transcript"] = speaker_transcript["text"]
             
-            # Assign speakers to transcription
-            logger.info(f"🎭 Diarization completed: {len(diarize_segments)} speaker segments")
-            
-            result = whisperx.assign_word_speakers(diarize_segments, 
-                                                   result,
-                                                   fill_nearest=True)
-
             total_time = time.time() - start_time
-            formatted_result = self._format_result(result, total_time)
-            
             logger.info(f"✅ Completed in {total_time:.2f}s")
-            return [formatted_result, total_time]
+            return [speaker_transcript, total_time]
             
         except Exception as e:
             logger.error(f"❌ Failed: {e}")

@@ -18,7 +18,7 @@ class FetchingAudioProcessingState:
         return TranscribingProcessingState()
 
     async def run_job(self, vid: str) -> int | bytes:
-        from ..download_audio import get_stored_audio, download_audio
+        from ..download_audio import get_stored_audio
 
         self.vid = vid
 
@@ -33,8 +33,12 @@ class FetchingAudioProcessingState:
             if oh.output.get("title") is None:
                 self.update_metadata()
 
+            audio_data = get_stored_audio(audiofile_path)
+            
+            # Start processing chain
             await self._next_state().run_job(vid)
-            return get_stored_audio(audiofile_path)
+            
+            return audio_data
         try:
             self.update_metadata()
             await self._next_state().run_job(vid)
