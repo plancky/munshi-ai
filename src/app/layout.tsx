@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Backdrop from "@/components/backdrop.svg?inline";
 import { Toaster } from "../components/ui/toaster";
 
 const inter = Inter({
@@ -31,7 +30,7 @@ export default function RootLayout({
             >
                 <div className="relative min-h-[100dvh]">
                     <Header />
-                    <main className="pt-32">{children}</main>
+                    <main className="pt-16">{children}</main>
                 </div>
                 <Toaster />
             </body>

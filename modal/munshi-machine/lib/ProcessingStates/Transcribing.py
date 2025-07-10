@@ -111,8 +111,6 @@ class TranscribingProcessingState:
                     enable_speakers=False,
                     num_speakers=1
                 )
-                # Remove speaker info for non-speaker mode
-                output_data["speaker_transcript"] = output_data["text"]
                 logger.info(f"[TRANSCRIBE_RAW] vid={vid} text_len={len(output_data['text']) if output_data.get('text') else 0} sample={output_data['text'][:200] if output_data.get('text') else ''}")
             
             logger.info(f"Transcription completed in {time_elapsed:.2f}s")
@@ -137,8 +135,6 @@ class TranscribingProcessingState:
                     logger.info(f"Detected speaker mappings: {speaker_mappings}")
                 logger.info(f"DEBUG: Final speaker_transcript to be written: {output_data['speaker_transcript']}")
             elif not enable_speakers:
-                # When speakers are disabled, speaker_transcript should match the cleaned text
-                output_data["speaker_transcript"] = output_data["text"]
                 logger.info("Speakers disabled - speaker_transcript set to match cleaned text")
             
             logger.info("Transcript cleaning completed")

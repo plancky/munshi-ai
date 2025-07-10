@@ -76,3 +76,8 @@ APT_PACKAGES = [
     "git",
     "ffmpeg"
 ]
+
+CUDNN_PACKAGES = [
+    "libcudnn8",
+    "libcudnn8-dev"
+]

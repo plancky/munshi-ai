@@ -24,12 +24,14 @@ def download_whisperx_models():
 Cuda Image to run transcribe function
 """
 cuda_image = (
-    Image.from_registry("nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04", add_python="3.11")
-    .apt_install(*config.APT_PACKAGES + ["libcudnn8", "libcudnn8-dev"])
+    Image.from_registry("nvidia/cuda:12.8.0-cudnn-devel-ubuntu22.04", add_python="3.12")
+    .apt_install(*config.APT_PACKAGES + config.CUDNN_PACKAGES)
     .pip_install(*config.PYTHON_PACKAGES)
     .run_commands("python -m pip install --upgrade pip wheel setuptools")
     .run_commands("MAX_JOBS=10 python -m pip install flash-attn --use-pep517 --no-build-isolation --verbose", gpu="A10G")
-    .env({"HF_HUB_ENABLE_HF_TRANSFER": "1"})
+    .env({
+        "HF_HUB_ENABLE_HF_TRANSFER": "1"
+    })
     # Pre-download models for faster cold starts
     .run_function(download_whisperx_models)
 )
@@ -38,7 +40,7 @@ cuda_image = (
 Base Image to run get_audio function
 """
 base_image = (
-    Image.debian_slim(python_version="3.11")
+    Image.debian_slim(python_version="3.12")
     .apt_install(*config.APT_PACKAGES)
     .pip_install(*config.BASE_PYTHON_PACKAGES)
 )

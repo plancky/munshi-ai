@@ -2,9 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { config } from "@/app/config";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import Logo from "@/logo/logo.svg?inline";
+import { buttonVariants } from "@/components/ui/button";
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/ssr";
 
 interface SectionProps extends React.HTMLAttributes<HTMLElement> {}
@@ -13,7 +11,7 @@ export default function HeroSection({ ...props }: SectionProps) {
     return (
         <section {...props}>
             <div className="min-h-screen flex flex-col items-center justify-center px-4 lg:px-8">
-                <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center flex-1">
+                <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                     {/* Left Column - Content */}
                     <div className="text-center lg:text-left">
                         <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-6 leading-tight">
@@ -47,7 +45,7 @@ export default function HeroSection({ ...props }: SectionProps) {
                 </div>
                 
                 {/* Credits Section */}
-                <div className="text-center mb-8">
+                <div className="text-center mb-4 mt-16">
                     <p className="text-sm text-muted-foreground">
                         Created with ❤️ by{" "}
                         <a 

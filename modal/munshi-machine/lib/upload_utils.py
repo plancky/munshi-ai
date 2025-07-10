@@ -5,7 +5,7 @@ import json
 
 from fastapi import UploadFile, Form, File
 from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR, UPLOAD_CHUNK_DIR
-from ..volumes import audio_storage_vol, transcriptions_vol
+from ..volumes import audio_storage_vol
 
 
 def generate_file_id_from_content(file_content: bytes) -> str:

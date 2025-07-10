@@ -9,10 +9,9 @@ import { ModedOutputDataObject } from "../../api/get/types";
 import { MetadataObject } from "@/shared/types";
 import { SparkleIcon, ArrowDownIcon, UsersIcon, FileTextIcon, PencilIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState, useEffect, useMemo } from "react";
-import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
-import { processTextWithAds } from "@/lib/ad-processing";
+import { processTextWithTags, TAGS } from '@/lib/tag-processing';
 
 interface TranscriptCardProps {
     data: ModedOutputDataObject;
@@ -63,30 +62,6 @@ function parseTranscript(transcript: string, mappings: Record<string, string>): 
     const lines = transcript.split(/\n+/).filter(Boolean);
     const segments: ParsedSegment[] = [];
     for (let line of lines) {
-        // Detect ad segment: [AD] ... [AD]
-        const isAd = line.trim().startsWith('[AD]') && line.trim().endsWith('[AD]');
-        if (isAd) {
-            const cleaned = line.trim().replace(/^\[AD\]\s*/, '').replace(/\s*\[AD\]$/, '').trim();
-            const match = cleaned.match(/^([^:]+?):\s*(.*)$/);
-            if (match) {
-                const speakerLabel = match[1]?.trim() || '';
-                const text = match[2]?.trim() || '';
-                segments.push({
-                    isAd: true,
-                    speakerId: speakerLabel,
-                    displayName: getDisplaySpeakerName(speakerLabel, mappings),
-                    text,
-                });
-            } else {
-                segments.push({
-                    isAd: true,
-                    speakerId: '',
-                    displayName: '',
-                    text: cleaned,
-                });
-            }
-            continue;
-        }
         // Regular speaker segment
         const mapped = applySpeakerMappings(line, mappings);
         const match = mapped.match(/^([^:]+?):\s*(.*)$/);
@@ -94,10 +69,17 @@ function parseTranscript(transcript: string, mappings: Record<string, string>): 
             const speakerLabel = match[1]?.trim() || '';
             const text = match[2]?.trim() || '';
             segments.push({
-                isAd: false,
+                isAd: false, // Tag detection is now handled by processTextWithTags
                 speakerId: speakerLabel,
                 displayName: getDisplaySpeakerName(speakerLabel, mappings),
                 text,
+            });
+        } else if (line) {
+            segments.push({
+                isAd: false,
+                speakerId: '',
+                displayName: '',
+                text: line,
             });
         }
     }
@@ -145,26 +127,7 @@ function SpeakerParagraph({ segment, onEditSpeaker }: { segment: ParsedSegment; 
     };
     const cancelEdit = () => setIsEditing(false);
 
-    // Ad segment rendering
-    if (segment.isAd) {
-        return (
-            <div className="group relative">
-                <div className="absolute -left-10 top-1/2 -translate-y-1/2">
-                    <span className="px-2 py-0.5 rounded-full bg-muted text-foreground border border-border text-xs font-semibold shadow">Ad</span>
-                </div>
-                {segment.displayName && (
-                    <div className="mb-2">
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold border-2 border-dashed border-accent bg-accent/10 text-accent-foreground">
-                            {segment.displayName}
-                        </span>
-                    </div>
-                )}
-                <div className="italic text-muted-foreground text-sm leading-relaxed pl-1">
-                    {segment.text}
-                </div>
-            </div>
-        );
-    }
+    // Ad segment rendering is now handled by processTextWithAds in the text below
     // Regular speaker rendering
     const isUnknown = !segment.displayName || segment.displayName.trim().toLowerCase() === 'unknown';
     return (
@@ -205,7 +168,8 @@ function SpeakerParagraph({ segment, onEditSpeaker }: { segment: ParsedSegment; 
                 )}
             </div>
             <div className="text-sm leading-relaxed text-foreground pl-1">
-                {processTextWithAds(segment.text).content}
+                {/* Use processTextWithTags for speaker text */}
+                {processTextWithTags(segment.text).content}
             </div>
         </div>
     );
@@ -284,7 +248,10 @@ export default function TranscriptCard({
     };
     
     const parsedSegments: ParsedSegment[] = useMemo(() => parseTranscript(speaker_transcript || '', localSpeakerMappings), [speaker_transcript, localSpeakerMappings]);
-    
+
+    // Use processTextWithTags for all transcript rendering
+    const { content, tagSegments, hasTags } = processTextWithTags(displayContent.text);
+
     return (
         <div className="content-grid py-8">
             <div className="full-width-gridless flex gap-8 max-w-5xl mx-auto">
@@ -411,35 +378,33 @@ export default function TranscriptCard({
                         </div>
                     </CardHeader>
                     <CardContent className="px-4 pb-4">
-                        <div className="prose prose-gray dark:prose-invert prose-sm max-w-none">
-                            {viewMode === "speakers" ? (
-                                <div className="space-y-4">
-                                    {parsedSegments.map((segment, _i) => (
-                                        <SpeakerParagraph 
-                                            key={_i}
-                                            segment={segment}
-                                            onEditSpeaker={handleSpeakerEdit}
-                                        />
-                                    ))}
+                        <div className="relative">
+                            {/* Render tag badges outside the card, visually distinct */}
+                            {hasTags && tagSegments.map(({ tag, index }) => (
+                                <div
+                                    key={`badge-${tag}-${index}`}
+                                    style={{
+                                        position: 'absolute',
+                                        left: '-60px',
+                                        top: `${index * 2.5}em`,
+                                        background: TAGS[tag].color,
+                                        color: '#fff',
+                                        borderRadius: '8px',
+                                        padding: '0.25em 0.75em',
+                                        fontWeight: 600,
+                                        fontSize: '0.95em',
+                                        boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                                        zIndex: 2,
+                                        whiteSpace: 'nowrap',
+                                    }}
+                                >
+                                    {TAGS[tag].label}
                                 </div>
-                            ) : (
-                                <div className="space-y-4">
-                                    {displayContent.paras?.map((para, _i) => {
-                                        const processed = processTextWithAds(para);
-                                        return (
-                                            <div key={`para_${_i}`} className="text-sm leading-relaxed text-foreground relative">
-                                                {processed.content}
-                                                {/* Add sponsored indicators to left margin */}
-                                                {processed.hasAds && (
-                                                    <div className="absolute -left-10 top-1/2 -translate-y-1/2">
-                                                        <span className="px-2 py-0.5 rounded-full bg-muted text-foreground border border-border text-xs font-semibold shadow">Ad</span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                            ))}
+                            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6 min-h-[120px]">
+                                {/* Render processed content with tags */}
+                                {content}
+                            </div>
                         </div>
                     </CardContent>
                 </Card>
