@@ -14,7 +14,7 @@ import { MODAL_URL } from "@/lib/url";
 
 export function AskMunishiSection() {
     return (
-        <div className="flex h-full min-h-[calc(100dvh-160px)] w-full justify-center">
+        <div className="flex h-full w-full justify-center pt-16">
             <Providers>
                 <FormStateContextProvider>
                     <div className="relative flex w-full max-w-[1080px] flex-col items-center justify-center">
@@ -22,7 +22,7 @@ export function AskMunishiSection() {
                             <SelectAudioCard className="transition-all duration-200" />
                             <SpeakerSettings />
                         </div>
-                        <div className="relative w-full flex-initial">
+                        <div className="relative w-full flex-initial mb-4">
                             <TranscribeButton />
                         </div>
                     </div>

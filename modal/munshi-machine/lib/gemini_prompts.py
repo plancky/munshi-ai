@@ -16,7 +16,7 @@ RULES:
 • Break into logical paragraphs, maintain conversational tone
 
 AD/SPONSOR HANDLING:
-• Flag any obvious advertisements, sponsorships, or promotional content with [AD] tags
+• Flag any obvious advertisements, sponsorships, or promotional content with [AD] tags (opening and closing tags are required)
 • Include: "This episode is sponsored by...", product placements, discount codes, promotional segments
 • Keep the content but mark it clearly for transparency
 

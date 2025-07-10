@@ -43,19 +43,8 @@ const LOADING_MESSAGES = {
     },
 };
 
-const TIPS = [
-    { icon: "🎯", text: "95%+ accuracy even with background noise" },
-    { icon: "👥", text: "Automatic speaker identification and separation" },
-    { icon: "⚡", text: "Processing audio 10x faster than real-time" },
-    { icon: "🌟", text: "Smart punctuation and formatting included" },
-    { icon: "🔍", text: "AI-powered summaries highlight key insights" },
-    { icon: "🌍", text: "Support for 50+ languages and dialects" },
-];
-
 export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
     const messageData = LOADING_MESSAGES[props?.state];
-    const [currentTip, setCurrentTip] = useState(0);
-    const [animationKey, setAnimationKey] = useState(0);
 
     const showShareLink = props?.state !== TRANSCRIPTION_STATUS.COMPLETED && 
                          props?.state !== TRANSCRIPTION_STATUS.HOLD;
@@ -64,15 +53,6 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
                         props?.state === TRANSCRIPTION_STATUS.SUMMARIZING;
 
     const isCompleted = props?.state === TRANSCRIPTION_STATUS.COMPLETED;
-
-    // Rotate tips every 5 seconds with smooth transitions
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTip(prev => (prev + 1) % TIPS.length);
-            setAnimationKey(prev => prev + 1);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, []);
 
     const StatusIcon = messageData?.icon || CircleNotchIcon;
     
@@ -127,33 +107,6 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
                                 <span>{messageData?.progress || 0}% complete</span>
                             </div>
                         </div>
-                    </div>
-                </div>
-                
-                {/* Rotating Tips */}
-                <div className="relative max-w-2xl mx-auto">
-                    <div className="bg-muted/30 border border-border/50 rounded-xl p-6 backdrop-blur-sm">
-                        <div 
-                            key={animationKey}
-                            className="flex items-center justify-center gap-3 text-sm text-muted-foreground animate-in fade-in-0 slide-in-from-bottom-2 duration-500"
-                        >
-                            <span className="text-lg">{TIPS[currentTip].icon}</span>
-                            <span className="leading-relaxed">{TIPS[currentTip].text}</span>
-                        </div>
-                    </div>
-                    
-                    {/* Tip Indicators */}
-                    <div className="flex justify-center gap-1.5 mt-4">
-                        {TIPS.map((_, index) => (
-                            <div
-                                key={index}
-                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                                    index === currentTip 
-                                        ? 'bg-primary w-6' 
-                                        : 'bg-muted-foreground/30'
-                                }`}
-                            />
-                        ))}
                     </div>
                 </div>
                 
