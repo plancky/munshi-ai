@@ -76,24 +76,22 @@ class TranscribingProcessingState:
 
     async def run_job(self, vid: str) -> None:
         from ...functions.transcribe import WhisperX
-        
+
         # Update state
         updateOutputJson(vid, self.StateSymbol)
-        
+
         # Check audio file exists
         audiofile_path = audio_path(vid)
         if not audiofile_path.exists():
             raise RuntimeError(f"Audio file missing: {audiofile_path}")
-        
+
         # Get speaker settings
         enable_speakers, num_speakers = get_speaker_settings(vid)
-        
         logger.info(f"Starting transcription for {vid} - Speakers: {enable_speakers}, Count: {num_speakers}")
-        
+
         try:
             # Simple WhisperX call
             model = WhisperX()
-            
             if enable_speakers:
                 output_data, time_elapsed = model.transcribe_and_diarize.remote(
                     str(audiofile_path),
@@ -112,18 +110,18 @@ class TranscribingProcessingState:
                     num_speakers=1
                 )
                 logger.info(f"[TRANSCRIBE_RAW] vid={vid} text_len={len(output_data['text']) if output_data.get('text') else 0} sample={output_data['text'][:200] if output_data.get('text') else ''}")
-            
+
             logger.info(f"Transcription completed in {time_elapsed:.2f}s")
-            
+
             # Clean transcripts through Gemini
             logger.info("Cleaning transcripts with Gemini...")
             from ..gemini import get_cleaned_transcript, get_cleaned_speaker_transcript
-            
+
             # Clean regular transcript
             if output_data.get("text"):
                 output_data["text"] = await get_cleaned_transcript(output_data["text"])
                 logger.info(f"[TRANSCRIBE_CLEANED] vid={vid} cleaned_text_len={len(output_data['text']) if output_data.get('text') else 0} sample={output_data['text'][:200] if output_data.get('text') else ''}")
-            
+
             # Clean speaker transcript and parse mappings ONLY if speakers are enabled
             if enable_speakers and output_data.get("speaker_transcript") and output_data["speaker_transcript"] != output_data.get("text"):
                 cleaned_speaker_transcript = await get_cleaned_speaker_transcript(output_data["speaker_transcript"])
@@ -136,15 +134,15 @@ class TranscribingProcessingState:
                 logger.info(f"DEBUG: Final speaker_transcript to be written: {output_data['speaker_transcript']}")
             elif not enable_speakers:
                 logger.info("Speakers disabled - speaker_transcript set to match cleaned text")
-            
+
             logger.info("Transcript cleaning completed")
-            
+
             # Update output and continue
             updateOutputJson(vid, self._next_state_obj.StateSymbol, output_data)
             await self._next_state_obj.run_job(vid)
-            
+
             return 0
-            
+
         except Exception as e:
             logger.error(f"Transcription failed: {e}")
             return -1

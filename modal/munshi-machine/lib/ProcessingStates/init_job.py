@@ -3,10 +3,6 @@ from ..utils import (
     updateOutputJson,
 )
 
-from .summarizing import SummarizingGeminiProcessingState
-from .transcribing import TranscribingProcessingState
-from .completed import CompletedProcessingState
-from .fetching_audio import FetchingAudioProcessingState
 
 import asyncio
 import pathlib
@@ -16,6 +12,11 @@ logger = config.get_logger(__name__)
 
 
 def processingStateFactory(symbol):
+    from .summarizing import SummarizingGeminiProcessingState
+    from .transcribing import TranscribingProcessingState
+    from .completed import CompletedProcessingState
+    from .fetching_audio import FetchingAudioProcessingState
+
     STATE_MAP = {
         "Init": InitProcessingState(),
         "initiated": InitProcessingState(),
@@ -42,10 +43,12 @@ class ProcessingState:
 
 
 class InitProcessingState:
+
     def __init__(self) -> None:
         self.StateSymbol = "Init"
 
     def _next_state(self):
+        from .fetching_audio import FetchingAudioProcessingState
         return FetchingAudioProcessingState()
 
     async def run_job(self, vid: str, audiofile: str = None, chained=True):
