@@ -1,7 +1,7 @@
 from ..utils import updateOutputJson, output_handler
 from .completed import CompletedProcessingState
-from ..gemini import processor
 from ... import config
+import time
 
 logger = config.get_logger(__name__)
 
@@ -14,9 +14,9 @@ class SummarizingGeminiProcessingState:
         return self._next_state_obj
 
     async def run_job(self, vid: str) -> None:
+        from ..gemini import processor
         # update new state on the output json
         updateOutputJson(vid, self.StateSymbol)
-        
         summarize_start = time.time()
         try:
             logger.info(f"Starting summary generation for video {vid}")
