@@ -55,7 +55,6 @@ export function InputFile() {
                         accept=".mp3"
                         className="hidden"
                         onChange={async (event) => {
-                            const value = event.target.value;
                             const files = event.target.files;
                             if (files?.length) console.log(files[0]);
                             if (files?.length) {
@@ -66,8 +65,9 @@ export function InputFile() {
                                     .slice(0, 16);
 
                                 const file = new File(
-                                    [new Blob([await files[0].arrayBuffer()])],
+                                    [new Blob([await files[0].arrayBuffer()], { type: files[0].type })],
                                     id,
+                                    { type: files[0].type }
                                 );
 
                                 // Validate file size (max 500MB)

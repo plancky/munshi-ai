@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-import WaveSurfer from 'wavesurfer.js';
 import { Play, Pause } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -10,97 +9,69 @@ interface AudioVisualizerProps {
 }
 
 export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisualizerProps) {
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Reset loading state when audioUrl changes
-    setIsLoading(true);
-    setIsReady(false);
+    // Reset state when audioUrl changes
     setIsPlaying(false);
+    setDuration(0);
+    setCurrentTime(0);
+    setIsLoading(true);
     
-    if (waveformRef.current) {
-      // Initialize WaveSurfer with performance optimizations
-      wavesurfer.current = WaveSurfer.create({
-        container: waveformRef.current,
-        waveColor: 'hsl(215, 20%, 65%)', // muted-foreground
-        progressColor: 'hsl(213, 93%, 68%)', // primary
-        cursorColor: 'hsl(213, 93%, 68%)', // primary
-        barWidth: 3,           // Wider bars = fewer DOM elements
-        barGap: 2,             // Larger gaps = fewer bars
-        barRadius: 1,
-        height: 60,
-        normalize: false,      // Skip normalization for faster loading
-        backend: 'MediaElement', // Much faster than WebAudio for long files
-        mediaControls: false,  // Disable native controls
-        interact: true,        // Keep seeking functionality
-        hideScrollbar: true,   // Clean UI
-        minPxPerSec: 20,       // Lower resolution = faster rendering
-      });
-
-      // Event listeners
-      wavesurfer.current.on('ready', () => {
-        setDuration(wavesurfer.current?.getDuration() || 0);
-        setIsLoading(false);
-        setIsReady(true);
-      });
-
-      wavesurfer.current.on('loading', (progress) => {
-        if (progress < 100) {
-          setIsLoading(true);
-        }
-      });
-
-      // Add error handler for loading failures
-      wavesurfer.current.on('error', (error) => {
-        console.warn('WaveSurfer loading error:', error);
-        setIsLoading(false);
-        setIsReady(false);
-      });
-
-      // Load audio (put this after event listeners)
-      wavesurfer.current.load(audioUrl);
-
-      wavesurfer.current.on('audioprocess', () => {
-        setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
-      });
-
-      wavesurfer.current.on('play', () => {
-        setIsPlaying(true);
-      });
-
-      wavesurfer.current.on('pause', () => {
-        setIsPlaying(false);
-      });
-
-      wavesurfer.current.on('finish', () => {
-        setIsPlaying(false);
-      });
-    }
-
-    return () => {
-      // Safe cleanup: stop playback and destroy WaveSurfer instance
-      try {
-        if (wavesurfer.current) {
-          wavesurfer.current.pause(); // Stop any playback first
-          wavesurfer.current.destroy();
-        }
-      } catch (error) {
-        // Ignore cleanup errors - component is unmounting anyway
-        console.warn('WaveSurfer cleanup warning:', error);
-      }
-      wavesurfer.current = null;
-    };
   }, [audioUrl]);
 
-  const togglePlayPause = () => {
-    if (wavesurfer.current) {
-      wavesurfer.current.playPause();
+  const togglePlayPause = async () => {
+    if (audioRef.current) {
+      try {
+        if (isPlaying) {
+          audioRef.current.pause();
+        } else {
+          await audioRef.current.play();
+        }
+      } catch (err) {
+        console.error('Error toggling play/pause:', err);
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+      setIsLoading(false);
+    }
+  };
+
+  const handleCanPlay = () => {
+    setIsLoading(false);
+  };
+
+  const handlePlay = () => {
+    setIsPlaying(true);
+  };
+
+  const handlePause = () => {
+    setIsPlaying(false);
+  };
+
+  const handleEnded = () => {
+    setIsPlaying(false);
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (audioRef.current) {
+      const newTime = parseFloat(e.target.value);
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
     }
   };
 
@@ -113,12 +84,25 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
   return (
     <div className={`bg-muted rounded-lg border p-4 ${className}`}>
       <div className="flex items-center gap-4">
+        {/* Hidden audio element */}
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          preload="metadata"
+          onTimeUpdate={handleTimeUpdate}
+          onLoadedMetadata={handleLoadedMetadata}
+          onCanPlay={handleCanPlay}
+          onPlay={handlePlay}
+          onPause={handlePause}
+          onEnded={handleEnded}
+        />
+
         {/* Play/Pause Button */}
         <Button
           onClick={togglePlayPause}
           variant="default"
           size="icon"
-          disabled={!isReady}
+          disabled={isLoading}
           className="flex-shrink-0 w-10 h-10 rounded-full"
         >
           {isLoading ? (
@@ -130,18 +114,18 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
           )}
         </Button>
 
-        {/* Waveform Container */}
-        <div className="flex-1 min-w-0 relative">
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">
-              Loading waveform...
-            </div>
-          )}
-          <div 
-            ref={waveformRef} 
-            className={`w-full transition-opacity duration-300 ${
-              isLoading ? 'opacity-30' : 'opacity-100'
-            }`}
+        {/* Progress Bar */}
+        <div className="flex-1 min-w-0">
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeek}
+            className="w-full h-2 bg-muted-foreground/20 rounded-lg appearance-none cursor-pointer disabled:opacity-50 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-webkit-slider-thumb]:shadow-sm [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white [&::-moz-range-thumb]:shadow-sm"
+            style={{
+              background: `linear-gradient(to right, hsl(213, 93%, 68%) 0%, hsl(213, 93%, 68%) ${(currentTime / (duration || 1)) * 100}%, hsl(215, 20%, 65%) ${(currentTime / (duration || 1)) * 100}%, hsl(215, 20%, 65%) 100%)`
+            }}
           />
         </div>
 
