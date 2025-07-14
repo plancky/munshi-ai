@@ -53,8 +53,7 @@ export function processTextWithTags(text: string): {
             <span 
                 key={`${tag.toLowerCase()}-${idx}`}
                 data-tag={tag}
-                data-tag-type={tag}
-                className={`rounded px-1 py-0.5 text-sm font-medium bg-orange-100 text-orange-800 hover:bg-orange-200`}
+                className={`rounded text-sm font-medium bg-accent/20 text-accent-foreground hover:bg-accent/30 transition-colors`}
                 title={tagConfig.label}
             >
                 {content.trim()}
@@ -97,7 +96,7 @@ export function processTextIntoParagraphs(text: string): {
         if (hasTagBlocks) {
             // Extract the tag type for the indicator
             const tagMatch = paragraphText.match(/\[(AD|TAG)\]/);
-            const tagType = tagMatch?.[1] as SupportedTag || 'AD';
+            const tagType = TAGS[tagMatch?.[1] as SupportedTag]?.label || 'Tag';
             
             // Process the paragraph content with tag highlighting
             const { content } = processTextWithTags(paragraphText);
@@ -106,7 +105,7 @@ export function processTextIntoParagraphs(text: string): {
             const wrappedContent = [
                 <div key="tagged-paragraph" className="relative" data-tag={tagType}>
                     {/* Tag indicator positioned relative to this paragraph */}
-                    <div className="hidden lg:block absolute left-[-80px] top-0 pointer-events-none">
+                    <div className="hidden lg:block absolute left-[-100px] top-1 pointer-events-none">
                         <TagIndicator text={tagType} />
                     </div>
                     <div>

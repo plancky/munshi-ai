@@ -128,10 +128,7 @@ function AnimatedDemo() {
         // Start first cycle
         animationCycle();
         
-        // Set up repeating cycle every 8 seconds
-        const cycleInterval = setInterval(animationCycle, 8000);
-        
-        return () => clearInterval(cycleInterval);
+        return () => {};
     }, [fullText]);
     
     return (

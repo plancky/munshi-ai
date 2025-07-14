@@ -95,17 +95,17 @@ export default function TranscriptCard({
                 <div className="flex flex-col gap-5 flex-1">
                 {/* Audio Metadata Header */}
                 {(audioTitle || author) && (
-                    <div className="flex flex-col gap-2 mb-2">
+                    <div className="flex flex-col gap-3 mb-4">
                         {audioTitle && (
                             <div className="flex items-center gap-2">
-                                <h1 className="font-heading text-base lg:text-lg font-semibold text-foreground">
+                                <h1 className="text-lg lg:text-xl font-semibold text-foreground ml-4 lg:ml-0 leading-tight">
                                     {Array.isArray(audioTitle) ? audioTitle.join(' ') : audioTitle}
                                 </h1>
                             </div>
                         )}
                         {author && (
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                                <span className="text-sm font-medium">{Array.isArray(author) ? author.join(' ') : author}</span>
+                            <div className="flex items-center gap-2 text-muted-foreground ml-4 lg:ml-0">
+                                <span className="text-base font-medium">{Array.isArray(author) ? author.join(' ') : author}</span>
                             </div>
                         )}
                     </div>
@@ -151,66 +151,73 @@ export default function TranscriptCard({
 
                 {/* Transcript Card */}
                 <Card className="bg-card/80 backdrop-blur-sm border border-border/50 shadow-lg ring-1 ring-primary/5">
-                        <CardHeader className="pb-3 pt-4 px-4">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <CardTitle className="font-heading text-base">Full Transcript</CardTitle>
-                                    {speaker_transcript && (
-                                        <ToggleGroup 
-                                            value={viewMode} 
-                                            onValueChange={(value) => value && setViewMode(value as "regular" | "speakers")}
-                                            type="single"
-                                            size="sm"
-                                        >
-                                            <ToggleGroupItem value="regular" className="gap-1.5 text-xs">
-                                                <FileTextIcon size={12} />
-                                                Regular
-                                            </ToggleGroupItem>
-                                            <ToggleGroupItem value="speakers" className="gap-1.5 text-xs">
-                                                <UsersIcon size={12} />
-                                                Speakers
-                                            </ToggleGroupItem>
-                                        </ToggleGroup>
-                                    )}
-                                    <div className="flex items-center gap-2">
-                                        {isSavingSpeakers && (
-                                            <span className="text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1">
-                                                <div className="w-3 h-3 border border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                                                Saving...
-                                            </span>
-                                        )}
-                                        {lastSaveError && (
-                                            <span className="text-xs text-red-600 dark:text-red-400">
-                                                Error: {lastSaveError}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <ClipboardCopy 
-                                        textToCopy={text || ""}
-                                        variant="outline" 
+                    <CardHeader className="pb-3 pt-4 px-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <CardTitle className="font-heading text-base">Full Transcript</CardTitle>
+                                {speaker_transcript && (
+                                    <ToggleGroup 
+                                        value={viewMode} 
+                                        onValueChange={(value) => value && setViewMode(value as "regular" | "speakers")}
+                                        type="single"
                                         size="sm"
+                                        className="bg-muted/50 p-0.5 rounded-lg"
                                     >
-                                        Copy
-                                    </ClipboardCopy>
+                                        <ToggleGroupItem 
+                                            value="regular" 
+                                            className="gap-1.5 text-xs data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm transition-all duration-200"
+                                        >
+                                            <FileTextIcon size={12} />
+                                            Regular
+                                        </ToggleGroupItem>
+                                        <ToggleGroupItem 
+                                            value="speakers" 
+                                            className="gap-1.5 text-xs data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm transition-all duration-200"
+                                        >
+                                            <UsersIcon size={12} />
+                                            Speakers
+                                        </ToggleGroupItem>
+                                    </ToggleGroup>
+                                )}
+                                <div className="flex items-center gap-2">
+                                    {isSavingSpeakers && (
+                                            <span className="text-xs text-primary dark:text-primary flex items-center gap-1">
+                                                <div className="w-3 h-3 border border-primary border-t-transparent rounded-full animate-spin" />
+                                            Saving...
+                                        </span>
+                                    )}
+                                    {lastSaveError && (
+                                            <span className="text-xs text-destructive dark:text-destructive">
+                                            Error: {lastSaveError}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                        </CardHeader>
-                        <CardContent className="px-4 pb-4">
+                            <div className="flex items-center gap-2">
+                                <ClipboardCopy 
+                                    textToCopy={text || ""}
+                                    variant="outline" 
+                                    size="sm"
+                                >
+                                    Copy
+                                </ClipboardCopy>
+                            </div>
+                        </div>
+                    </CardHeader>
+                    <CardContent className="px-4 pb-4">
                             <div className="rounded-lg border shadow-sm p-4 min-h-[120px]">
                                 {/* Render different content based on view mode */}
                                 {viewMode === "speakers" && speaker_transcript ? (
                                     <SpeakerView 
                                         speakerSegments={speakerSegments}
-                                        onEditSpeaker={handleSpeakerEdit}
-                                    />
+                                                onEditSpeaker={handleSpeakerEdit}
+                                            />
                                 ) : (
                                     <RegularView paragraphs={paragraphs} />
                                 )}
-                            </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </CardContent>
+                </Card>
                 </div>
             </div>
         </div>

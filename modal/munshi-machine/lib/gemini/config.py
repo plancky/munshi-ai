@@ -1,5 +1,6 @@
 # Gemini AI Configuration
 from .models import GeminiResponse, GeminiSpeakerResponse
+from google.genai import types
 
 # Model configurations
 GEMINI_MODELS = {
@@ -17,17 +18,19 @@ GENERATION_CONFIGS = {
     },
     "cleaning_normal": {
         "temperature": 0.3,
-        "max_output_tokens": 60000,    
+        "max_output_tokens": 65000,    
         "top_p": 0.8,
         "response_mime_type": "application/json",
-        "response_schema": GeminiResponse
+        "response_schema": GeminiResponse,
+        "thinking_config": types.ThinkingConfig(thinking_budget=0)
     },
     "cleaning_speaker": {
         "temperature": 0.3,
         "max_output_tokens": 60000,    
         "top_p": 0.8,
         "response_mime_type": "application/json",
-        "response_schema": GeminiSpeakerResponse
+        "response_schema": GeminiSpeakerResponse,
+        "thinking_config": types.ThinkingConfig(thinking_budget=0)
     },
 }
 

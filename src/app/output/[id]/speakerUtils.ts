@@ -23,7 +23,7 @@ export function getDisplaySpeakerName(speakerId: string, mappings: Record<string
 export function parseSpeakerTranscript(transcript: string, mappings: Record<string, string>): SpeakerSegment[] {
     if (!transcript) return [];
     
-    const lines = transcript.split(/\n+/).filter(Boolean);
+    const lines = transcript.split(/\n\n|\n/).filter(Boolean);
     const segments: SpeakerSegment[] = [];
     
     for (let line of lines) {

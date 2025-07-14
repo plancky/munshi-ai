@@ -12,9 +12,7 @@ from .processor import (
 from .prompts import (
     clean_transcript_prompt,
     clean_speaker_transcript_prompt,
-    comprehensive_summary_prompt,
-    batch_combine_prompt,
-    quick_summary_prompt
+    batch_combine_prompt
 )
 
 from .config import (
@@ -34,9 +32,7 @@ __all__ = [
     # Prompts
     "clean_transcript_prompt",
     "clean_speaker_transcript_prompt", 
-    "comprehensive_summary_prompt",
     "batch_combine_prompt",
-    "quick_summary_prompt",
     
     # Config
     "GEMINI_MODELS",
