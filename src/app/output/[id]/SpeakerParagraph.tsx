@@ -4,6 +4,7 @@ import { PencilIcon } from "@phosphor-icons/react/dist/ssr";
 import { processTextWithTags } from '@/lib/transcript-processing';
 import { TagIndicator } from '@/components/TagIndicator';
 import { SpeakerSegment, getSpeakerColor } from './speakerUtils';
+import { TAGS, SupportedTag } from "@/lib/transcript-processing";
 
 interface SpeakerParagraphProps {
     segment: SpeakerSegment;
@@ -42,8 +43,8 @@ export function SpeakerParagraph({ segment, onEditSpeaker }: SpeakerParagraphPro
         <div className={`group ${hasTagBlocks ? 'relative' : ''}`}>
             {/* Tag indicator for speaker segments */}
             {hasTagBlocks && (
-                <div className="hidden lg:block absolute left-[-80px] top-8 pointer-events-none">
-                    <TagIndicator text={segment.text.match(/\[(AD|TAG)\]/)?.[1] || 'AD'} />
+                <div className="hidden lg:block absolute left-[-100px] top-8 pointer-events-none">
+                    <TagIndicator text={TAGS[segment.text.match(/\[(AD|TAG)\]/)?.[1] as SupportedTag]?.label || 'AD'} />
                 </div>
             )}
             <div className="mb-2">

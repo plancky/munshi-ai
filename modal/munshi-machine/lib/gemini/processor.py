@@ -4,11 +4,11 @@ Focused on high-quality transcript cleaning and summarization
 """
 
 from google import genai
+
 import os
 import asyncio
 import time
 from typing import Dict, Any
-
 
 from .config import (
     GEMINI_MODELS, GENERATION_CONFIGS,

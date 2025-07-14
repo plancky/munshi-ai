@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { FormStateContext, useFormState } from "./FormStateProvider";
 import React, { useCallback, useRef } from "react";
 import { FormStateActionTypes } from "./FormStateReducer";
@@ -38,65 +39,65 @@ export function InputFile() {
     return (
         <>
             {!audioFile ? (
-                <div className="border-2 border-dashed border-primary/30 bg-primary/5 p-8 text-center text-muted-foreground hover:border-primary/50 hover:bg-primary/10 transition-colors duration-200 rounded-lg">
-                    <Label htmlFor="audio" className="cursor-pointer block w-full">
-                        <div className="flex flex-col items-center gap-3">
-                            <UploadIcon size={32} className="text-primary/60" />
-                            <div>
-                                <p className="font-heading text-base">Drop your audio file here</p>
-                                <p className="text-sm">or click to browse</p>
-                                <p className="text-xs text-muted-foreground/70 mt-2">Supports MP3 files</p>
+                <Card className="border-2 border-dashed border-primary/30 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-colors duration-200 mx-0">
+                    <CardContent className="p-8 text-center text-muted-foreground">
+                        <Label htmlFor="audio" className="cursor-pointer block w-full">
+                            <div className="flex flex-col items-center gap-3">
+                                <UploadIcon size={32} className="text-primary/60" />
+                                <div>
+                                    <p className="text-base font-medium">Drop your audio file here</p>
+                                    <p className="text-sm">or click to browse</p>
+                                    <p className="text-xs text-muted-foreground/70 mt-2">Supports MP3 files</p>
+                                </div>
                             </div>
-                        </div>
-                    </Label>
-                    <Input
-                        id="audio"
-                        type="file"
-                        accept=".mp3"
-                        className="hidden"
-                        onChange={async (event) => {
-                            const files = event.target.files;
-                            if (files?.length) {
-                                const id = btoa(self.crypto.randomUUID())
-                                    .replace("+", "-")
-                                    .replace("/", "_")
-                                    .replace("-==", "")
-                                    .slice(0, 16);
+                        </Label>
+                        <Input
+                            id="audio"
+                            type="file"
+                            accept=".mp3"
+                            className="hidden"
+                            onChange={async (event) => {
+                                const files = event.target.files;
+                                if (files?.length) {
+                                    const id = btoa(self.crypto.randomUUID())
+                                        .replace("+", "-")
+                                        .replace("/", "_")
+                                        .replace("-==", "")
+                                        .slice(0, 16);
 
-                                const file = new File(
-                                    [new Blob([await files[0].arrayBuffer()], { type: files[0].type })],
-                                    id,
-                                    { type: files[0].type }
-                                );
+                                    const file = new File(
+                                        [new Blob([await files[0].arrayBuffer()], { type: files[0].type })],
+                                        id,
+                                        { type: files[0].type }
+                                    );
 
-                                // Validate file size (max 500MB)
-                                if (files[0].size > 500 * 1024 * 1024) {
-                                    toast({
-                                        title: "File too large",
-                                        description: "Please select a file smaller than 500MB.",
+                                    // Validate file size (max 500MB)
+                                    if (files[0].size > 500 * 1024 * 1024) {
+                                        toast({
+                                            title: "File too large",
+                                            description: "Please select a file smaller than 500MB.",
+                                        });
+                                        return;
+                                    }
+
+                                    const metadata = {
+                                        name: files[0].name,
+                                        size: files[0].size,
+                                        lastmod: files[0].lastModified,
+                                        id,
+                                    };
+
+                                    dispatch!({
+                                        type: FormStateActionTypes.ADD_AUDIO_FILE,
+                                        payload: { file, metadata },
                                     });
-                                    return;
                                 }
-
-                                const metadata = {
-                                    name: files[0].name,
-                                    size: files[0].size,
-                                    lastmod: files[0].lastModified,
-                                    id,
-                                };
-
-                                dispatch!({
-                                    type: FormStateActionTypes.ADD_AUDIO_FILE,
-                                    payload: { file, metadata },
-                                });
-                            }
-                        }}
-                    />
-                </div>
+                            }}
+                        />
+                    </CardContent>
+                </Card>
             ) : (
-                <>
-                    <VisualAudioFile />
-                </>
+                <VisualAudioFile />
             )}
         </>
     );
@@ -110,37 +111,39 @@ export function VisualAudioFile() {
     return (
         <>
             {audioFile && (
-                <div className="flex w-full max-w-full gap-1">
-                    <div className="flex w-full flex-1 flex-col gap-6 py-2">
-                        <div className="flex items-center gap-3 p-3 bg-muted rounded-lg border">
-                            <div className="text-primary">📁</div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-sm font-medium truncate">{audioFile.metadata.name}</p>
-                                <p className="text-xs text-muted-foreground">MP3 • {(audioFile.metadata.size / 1024 / 1024).toFixed(1)} MB</p>
+                <div className="flex flex-col gap-6">
+                    <Card className="mx-0">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                                <div className="text-primary">📁</div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium truncate">{audioFile.metadata.name}</p>
+                                    <p className="text-xs text-muted-foreground">MP3 • {(audioFile.metadata.size / 1024 / 1024).toFixed(1)} MB</p>
+                                </div>
+                                <Button
+                                    variant={"default"}
+                                    onClick={(event) => {
+                                        dispatch!({
+                                            type: FormStateActionTypes.REMOVE_AUDIO_FILE,
+                                            payload: {},
+                                        });
+                                    }}
+                                    className="aspect-square h-5 w-5 grow-0 cursor-pointer rounded-sm p-1"
+                                >
+                                    <Icons.close className="h-full w-full" />
+                                </Button>
                             </div>
-                            <Button
-                                variant={"default"}
-                                onClick={(event) => {
-                                    dispatch!({
-                                        type: FormStateActionTypes.REMOVE_AUDIO_FILE,
-                                        payload: {},
-                                    });
-                                }}
-                                className="aspect-square h-5 w-5 grow-0 cursor-pointer rounded-sm p-1"
-                            >
-                                <Icons.close className="h-full w-full" />
-                            </Button>
-                        </div>
+                        </CardContent>
+                    </Card>
 
-                        {audioFile?.file && (
-                            <AudioVisualizerWrapper 
-                                file={audioFile.file}
-                                className="w-full"
-                            />
-                        )}
+                    {audioFile?.file && (
+                        <AudioVisualizerWrapper 
+                            file={audioFile.file}
+                            className="w-full"
+                        />
+                    )}
 
-                        <UploadButton />
-                    </div>
+                    <UploadButton />
                 </div>
             )}
         </>
@@ -204,8 +207,16 @@ function UploadButton() {
                 {!formState.isUploaded ? (
                     <>
                         {isPending ? (
-                            <div className="relative h-5 w-full rounded-lg bg-slate-400">
-                                <div className="absolute h-full w-[var(--filled,0%)] rounded-lg bg-green-300"></div>
+                            <div className="space-y-3">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground">Uploading...</span>
+                                    <span className="text-xs text-muted-foreground">Please wait</span>
+                                </div>
+                                <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
+                                    <div 
+                                        className="absolute h-full w-[var(--filled,0%)] rounded-full bg-primary transition-all duration-300 ease-out"
+                                    />
+                                </div>
                             </div>
                         ) : (
                             <div className="flex gap-2">

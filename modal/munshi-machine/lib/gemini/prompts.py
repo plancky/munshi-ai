@@ -17,11 +17,13 @@ AD/SPONSOR DETECTION:
 • Identify obvious advertisements, sponsorships, or promotional content
 • Include: "This episode is sponsored by...", product placements, discount codes, promotional segments
 • Wrap detected ads with [AD] tags: [AD]This episode is sponsored by BetterHelp. BetterHelp offers...[/AD]
-• Put tagged content in separate paragraph/line for clear visual separation
+• An Ad always deserves its own paragraph.
 • Don't flag brief organic mentions of companies in conversation context
 
 CONSTRAINTS:
 • Preserve 100% of original content in cleaned_text
+
+Return the cleaned output as a list of strings, where each string is a logical paragraph.
 
 Process this transcript:"""
 
@@ -45,6 +47,17 @@ AD/SPONSOR DETECTION:
 • Include sponsorship mentions, product placements, discount codes
 • Wrap detected ads with [AD] tags: SPEAKER_00:[AD] This episode is sponsored by...[/AD]
 • Put tagged content in separate speaker segments for clear visual separation
+Example 1:
+INPUT:
+SPEAKER_00: Thank you for listening to this episode of the podcast. This episode is sponsored by BetterHelp. BetterHelp offers...
+OUTPUT:
+SPEAKER_00: Thank you for listening to this episode of the podcast. 
+SPEAKER_00: [AD]This episode is sponsored by BetterHelp. BetterHelp offers...[/AD]
+Example 2:
+INPUT:
+SPEAKER_00: This episode is sponsored by BetterHelp. BetterHelp offers...
+OUTPUT:
+SPEAKER_00: [AD]This episode is sponsored by BetterHelp. BetterHelp offers...[/AD]
 
 FORMATTING RULES:
 • Fix capitalization, punctuation, spacing in speech
@@ -56,7 +69,9 @@ FORMATTING RULES:
 CONSTRAINTS:
 • Keep original speaker labels (SPEAKER_00, SPEAKER_01, etc.)
 • Preserve 100% of speech content in cleaned_transcript
-• If no speaker names detected, use empty array for speaker_mappings
+• The output lists speaker_ids and speaker_names MUST be the same length, and each speaker_id must appear only once. If a speaker_id appears multiple times, only include its first detected name.
+
+Return the cleaned output as a list of strings, where each string is a speaker segment.
 
 Process this speaker transcript:"""
 

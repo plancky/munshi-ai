@@ -61,8 +61,8 @@ const ClipboardCopy: React.FC<ClipboardCopyProps> = ({
         >
             {copied ? (
                 <>
-                    <CheckIcon className="h-4 w-4 text-green-600" />
-                    {children && <span className="text-green-600">Copied!</span>}
+                    <CheckIcon className="h-4 w-4 text-primary" />
+                    {children && <span className="text-primary">Copied!</span>}
                 </>
             ) : (
                 <>
