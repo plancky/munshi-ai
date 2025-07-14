@@ -10,7 +10,7 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {}
 export default function HeroSection({ ...props }: SectionProps) {
     return (
         <section {...props}>
-            <div className="min-h-screen flex flex-col items-center justify-center px-4 lg:px-8">
+            <div className="min-h-screen flex flex-col items-center justify-center px-4 lg:px-8 pt-32">
                 <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
                     {/* Left Column - Content */}
                     <div className="text-center lg:text-left">

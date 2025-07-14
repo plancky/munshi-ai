@@ -55,7 +55,7 @@ class WhisperX:
         logger.info("✅ WhisperX setup complete")
 
     @method()
-    def transcribe_and_diarize(self, audio_file_path: str, min_speakers: int = 1, max_speakers: int = 10, enable_speakers: bool = True, num_speakers: int = 1):
+    def transcribe_and_diarize(self, audio_file_path: str, enable_speakers: bool = True, num_speakers: int = 1):
         """Simple WhisperX pipeline: transcribe + align + diarize (optionally)"""
         import whisperx
         import time
@@ -67,22 +67,22 @@ class WhisperX:
             # Load and transcribe
             audio = whisperx.load_audio(audio_file_path)
 
-            result = self.model.transcribe(audio, batch_size=self.batch_size)
+            raw_transcript_result = self.model.transcribe(audio, batch_size=self.batch_size)
             
-            logger.info(f"📝 Raw transcription completed: {len(result.get('segments', []))} segments")
-            logger.info(f"🔍 Language detected: {result.get('language', 'unknown')}")
-            
-            # Align for precise timestamps
-            result = whisperx.align(
-                result["segments"], 
-                self.model_a, 
-                self.metadata, 
-                audio, 
-                self.device, 
-                return_char_alignments=False
-            )
+            logger.info(f"📝 Raw transcription completed: {len(raw_transcript_result.get('segments', []))} segments")
+            logger.info(f"🔍 Language detected: {raw_transcript_result.get('language', 'unknown')}")
             
             if enable_speakers:
+                # Align for precise timestamps
+                raw_transcript_result = whisperx.align(
+                    raw_transcript_result["segments"], 
+                    self.model_a, 
+                    self.metadata, 
+                    audio, 
+                    self.device, 
+                    return_char_alignments=False
+                )
+
                 # Assign speakers
                 diarize_segments = self.diarize_model(
                     audio_file_path,
@@ -90,25 +90,23 @@ class WhisperX:
                 )
                 # Assign speakers to transcription
                 logger.info(f"🎭 Diarization completed: {len(diarize_segments)} speaker segments")
-                result = whisperx.assign_word_speakers(diarize_segments, 
-                                                       result,
+                speaker_transcript_result = whisperx.assign_word_speakers(diarize_segments, 
+                                                       raw_transcript_result,
                                                        fill_nearest=True)
-                speaker_transcript = self._format_result(result, time.time() - start_time)
+                transcript = self._format_result(speaker_transcript_result, time.time() - start_time, enable_speakers=True)
             else:
                 # No diarization, just plain transcript
-                speaker_transcript = self._format_result(result, time.time() - start_time)
-                # Overwrite speaker_transcript to be just the text (no speaker labels)
-                speaker_transcript["speaker_transcript"] = speaker_transcript["text"]
-            
+                transcript = self._format_result(raw_transcript_result, time.time() - start_time, enable_speakers=False)
+
             total_time = time.time() - start_time
             logger.info(f"✅ Completed in {total_time:.2f}s")
-            return [speaker_transcript, total_time]
+            return [transcript, total_time]
             
         except Exception as e:
             logger.error(f"❌ Failed: {e}")
             raise e
 
-    def _format_result(self, whisperx_result, processing_time):
+    def _format_result(self, whisperx_result, processing_time, enable_speakers: bool = False):
         """Convert WhisperX result to expected format"""
         segments = whisperx_result.get("segments", [])
         
@@ -183,11 +181,12 @@ class WhisperX:
         
         speaker_transcript = "\n".join(merged_parts)
         
-        logger.info(f"DEBUG: Full speaker_transcript after formatting: {speaker_transcript}")
+        # Print last 100 characters of speaker_transcript
+        logger.info(f"DEBUG: Last 100 characters of speaker_transcript: {speaker_transcript[-100:]}")
         
         return {
             "text": full_text,
-            "speaker_transcript": speaker_transcript,
+            "speaker_transcript": speaker_transcript if enable_speakers else None,
             "language": whisperx_result.get("language", "en"),
             "processing_time": processing_time
         }

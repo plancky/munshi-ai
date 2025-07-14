@@ -30,7 +30,7 @@ export default function RootLayout({
             >
                 <div className="relative min-h-[100dvh]">
                     <Header />
-                    <main className="pt-16">{children}</main>
+                    <main>{children}</main>
                 </div>
                 <Toaster />
             </body>

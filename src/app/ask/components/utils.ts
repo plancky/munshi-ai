@@ -64,11 +64,8 @@ export async function uploadFileInChunks(
             const data = await result.response.json();
             
             if (data?.id) {
-                console.log(`✅ Found file ID from chunk ${result.chunkIndex}:`, data.id);
-                
                 // Check if transcript already exists
                 if (data.status === "transcript_exists") {
-                    console.log("🎯 Transcript already exists! Redirecting...");
                     toast({
                         title: "Transcript Found!",
                         description: "This file was already transcribed. Redirecting to results...",
