@@ -56,7 +56,6 @@ export function InputFile() {
                         className="hidden"
                         onChange={async (event) => {
                             const files = event.target.files;
-                            if (files?.length) console.log(files[0]);
                             if (files?.length) {
                                 const id = btoa(self.crypto.randomUUID())
                                     .replace("+", "-")

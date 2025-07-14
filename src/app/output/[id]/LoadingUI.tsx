@@ -57,7 +57,7 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
     const StatusIcon = messageData?.icon || CircleNotchIcon;
     
     return (
-        <div className="min-h-[70vh] flex items-center justify-center px-4 py-12">
+        <div className="flex items-center justify-center px-4 pt-24">
             <div className="max-w-3xl mx-auto text-center space-y-12">
                 
                 {/* Main Status Card */}
@@ -83,7 +83,7 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
                                     <div className="relative bg-primary/10 border border-primary/20 rounded-full p-4">
                                         <StatusIcon 
                                             className={`w-8 h-8 text-primary ${
-                                                isCompleted ? '' : 'animate-spin'
+                                                isCompleted ? '' : 'animate-pulse'
                                             }`} 
                                         />
                                     </div>

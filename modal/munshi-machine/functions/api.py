@@ -131,16 +131,6 @@ async def transcribe_local(request: Request):
             content={"error": "Server error occurred"}, status_code=500
         )
 
-@web_app.get("/stats")
-def stats(request: Request):
-    from .transcribe import WhisperX
-
-    logger.info(f"Received a request from {request.client}")
-
-    model = WhisperX()
-    f = model.transcribe_and_diarize
-    return f.get_current_stats()
-
 
 @web_app.post("/fetch_data")
 async def fetch_output(request: Request):
@@ -157,8 +147,6 @@ async def fetch_output(request: Request):
         transcriptions_vol.reload()
         oh = output_handler(vid)
         status, data, metadata = oh.status, oh.data, oh.get_metadata()
-        if data and data.get('text'):
-            logger.info(f"[FETCH_DATA] vid={vid} text_len={len(data['text'])} sample={data['text'][:200]}")
         pass
     except RuntimeError as Error:
         return responses.JSONResponse(

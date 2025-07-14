@@ -42,14 +42,14 @@ ASSETS_PATH = pathlib.Path(__file__).parent / "frontend" / "dist"
 
 # python dependencies
 BASE_PYTHON_PACKAGES = [
-    "google-generativeai",
+    "google-genai==1.25.0",
     "tiktoken",
     "requests",
     "packaging",
     "wheel",
     "ffmpeg-python",
     "mutagen",
-    "python-multipart"
+    "python-multipart",
 ]
 
 ML_PYTHON_PACKAGES = [
