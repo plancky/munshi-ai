@@ -17,7 +17,7 @@ export default function HeroSection({ ...props }: SectionProps) {
                         <h1 className="text-3xl lg:text-4xl font-bold text-foreground mb-6 leading-tight">
                             Finally, transcription that doesn&apos;t suck
                         </h1>
-                        <p className="text-base lg:text-lg text-muted-foreground mb-8 max-w-2xl">
+                        <p className="text-base text-muted-foreground mb-8 max-w-2xl">
                             Drop your audio, get perfect text. Works with interviews, meetings, podcasts, lectures—anything with words.
                         </p>
                         

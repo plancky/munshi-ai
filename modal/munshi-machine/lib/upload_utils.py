@@ -158,10 +158,3 @@ async def cleanup_chunks(chunk_dir: str, total_chunks: int):
             os.rmdir(chunk_dir)
     except Exception as e:
         print(f"❌ Error cleaning up chunks: {e}")
-        # If we can't remove the directory, at least try to remove all files
-        try:
-            if os.path.exists(chunk_dir):
-                import shutil
-                shutil.rmtree(chunk_dir, ignore_errors=True)
-        except Exception as cleanup_error:
-            print(f"❌ Failed to force cleanup directory: {cleanup_error}")

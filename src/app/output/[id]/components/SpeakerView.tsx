@@ -1,6 +1,6 @@
 import React from "react";
 import { SpeakerParagraph } from './SpeakerParagraph';
-import { SpeakerSegment } from './speakerUtils';
+import { SpeakerSegment } from '../utils/speakerUtils';
 
 interface SpeakerViewProps {
     speakerSegments: SpeakerSegment[];

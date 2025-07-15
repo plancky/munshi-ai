@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { PencilIcon } from "@phosphor-icons/react/dist/ssr";
 import { processTextWithTags } from '@/lib/transcript-processing';
 import { TagIndicator } from '@/components/TagIndicator';
-import { SpeakerSegment, getSpeakerColor } from './speakerUtils';
+import { SpeakerSegment, getSpeakerColor } from '../utils/speakerUtils';
 import { TAGS, SupportedTag } from "@/lib/transcript-processing";
 
 interface SpeakerParagraphProps {

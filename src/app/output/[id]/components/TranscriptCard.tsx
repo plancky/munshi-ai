@@ -2,16 +2,16 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
-import { updateSpeakerMappings } from "./utils";
+import { updateSpeakerMappings } from "../utils/utils";
 import ClipboardCopy from "@/components/ClipboardCopy";
-import { ModedOutputDataObject } from "../../api/get/types";
+import { ModedOutputDataObject } from "../../../api/get/types";
 import { MetadataObject } from "@/shared/types";
 import { SparkleIcon, ArrowDownIcon, UsersIcon, FileTextIcon } from "@phosphor-icons/react/dist/ssr";
 import { useState, useEffect, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import React from "react";
 import { processTextIntoParagraphs } from '@/lib/transcript-processing';
-import { SpeakerSegment, parseSpeakerTranscript } from './speakerUtils';
+import { SpeakerSegment, parseSpeakerTranscript } from '../utils/speakerUtils';
 import { SpeakerView } from './SpeakerView';
 import { RegularView } from './RegularView';
 
@@ -98,7 +98,7 @@ export default function TranscriptCard({
                     <div className="flex flex-col gap-3 mb-4">
                         {audioTitle && (
                             <div className="flex items-center gap-2">
-                                <h1 className="text-lg lg:text-xl font-semibold text-foreground ml-4 lg:ml-0 leading-tight">
+                                <h1 className="text-base lg:text-lg font-semibold text-foreground ml-4 lg:ml-0 leading-tight">
                                     {Array.isArray(audioTitle) ? audioTitle.join(' ') : audioTitle}
                                 </h1>
                             </div>

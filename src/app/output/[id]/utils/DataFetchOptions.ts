@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
-import { ModedOutputObject } from "../../api/get/types";
+import { ModedOutputObject } from "@/app/api/get/types";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 
 export function dataFetchOptions(id: string) {
