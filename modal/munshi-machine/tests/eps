@@ -1,4 +1,0 @@
-#!/bin/bash
-
-URL=https://plancky--munshi-machine-entrypoint-dev.modal.run 
-curl -d '{"vid":"jNQXAC9IVRw"}' -H 'Content-Type: application/json' -X POST $URL/fetch_data

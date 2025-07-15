@@ -25,8 +25,6 @@ def get_logger(name, level=logging.INFO):
 MODEL_DIR = "/model"
 
 CACHE_DIR = "/cache"
-# Where downloaded podcasts are stored, by guid hash.
-# Mostly .mp3 files 50-100MiB.
 RAW_AUDIO_DIR = pathlib.Path(CACHE_DIR, "raw_audio")
 
 UPLOAD_CHUNK_DIR = pathlib.Path(CACHE_DIR, "chunks")
@@ -44,22 +42,31 @@ ASSETS_PATH = pathlib.Path(__file__).parent / "frontend" / "dist"
 
 # python dependencies
 BASE_PYTHON_PACKAGES = [
-    "google-generativeai",
+    "google-genai==1.25.0",
     "tiktoken",
     "requests",
     "packaging",
     "wheel",
     "ffmpeg-python",
     "mutagen",
-    "python-multipart"
+    "python-multipart",
 ]
 
 ML_PYTHON_PACKAGES = [
-    "transformers==4.36.2",
+    #"transformers==4.53.0",
+    # Core PyTorch - using newer versions but keeping compatibility
+    "torch==2.7.1",
+    "torchaudio==2.7.1",
+    "numpy==2.0.2",
+    
+    # WhisperX and dependencies
+    "git+https://github.com/m-bain/whisperx.git@v3.4.0",
+    "ctranslate2==4.4.0",
+    
+    # Additional optimizations
     "ninja",
-    "hf-transfer~=0.1",
-    "torch==2.6.0",
-    "torchvision==0.21.0",
+    "hf-transfer~=0.1", 
+    "pyannote.audio==3.3.2",
 ]
 
 PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES
@@ -67,8 +74,10 @@ PYTHON_PACKAGES = BASE_PYTHON_PACKAGES + ML_PYTHON_PACKAGES
 
 APT_PACKAGES = [
     "git",
-    "ffmpeg",
+    "ffmpeg"
 ]
 
-# Cobalt Api url
-COBALT_API_URL = "https://munshi-cobalt-759838166088.asia-south2.run.app"
+CUDNN_PACKAGES = [
+    "libcudnn8",
+    "libcudnn8-dev"
+]

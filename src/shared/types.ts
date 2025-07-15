@@ -4,6 +4,8 @@ export type DataObject = {
     text: string;
     language: string;
     summary_gemini: string;
+    speaker_transcript?: string;  // Speaker-aligned transcript
+    speaker_mappings?: Record<string, string>;  // Map speaker IDs to custom names
 };
 
 export type MetadataObject = {

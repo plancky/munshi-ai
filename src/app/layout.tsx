@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
-import Backdrop from "@/components/backdrop.svg?inline";
 import { Toaster } from "../components/ui/toaster";
 
 const inter = Inter({
@@ -29,7 +28,7 @@ export default function RootLayout({
             <body
                 className={`${inter.variable} font-primary antialiased`}
             >
-                <div className="content-grid relative z-0 min-h-[100dvh] grid-rows-[auto_1fr_auto]">
+                <div className="relative min-h-[100dvh]">
                     <Header />
                     <main>{children}</main>
                 </div>

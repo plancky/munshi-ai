@@ -1,22 +1,10 @@
-from urllib.parse import urlparse, parse_qs
 from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR
 import pathlib
 import json
 
 from .. import config
 
-# Logger
 logger = config.get_logger("UTILS")
-
-
-def get_vid_from_url(url: str) -> str:
-    return parse_qs(urlparse(url).query)["v"][0]
-
-
-def get_url_from_vid(vid: str) -> str:
-    if vid.startswith("local_"):
-        return ""
-    return f"https://www.youtube.com/watch?v={vid}"
 
 
 def audio_path(vid: str) -> pathlib.Path:
@@ -41,7 +29,6 @@ def updateOutputJsonDict(vid: str, fieldsDict):
 
 MUNSHI_TRANSCRIPTION_STATUS = {
     "initiated": "initiated",
-    "downloading_audio": "downloading_audio",
     "transcribing": "transcribing",
     "completed": "completed",
 }
@@ -52,28 +39,11 @@ class output_handler:
         self.vid = vid
         self.out_path = f"{TRANSCRIPTIONS_DIR}/{vid}.json"
         self.audio_path = f"{RAW_AUDIO_DIR}/{vid}.mp3"
+        # Initialize status to None, will be set by get_output()
+        self.status = None
+        self.data = None
+        self.output = {}
         self.get_output()
-        pass
-
-    def next_status(self):
-        _states = list(MUNSHI_TRANSCRIPTION_STATUS.keys())
-        self.status = MUNSHI_TRANSCRIPTION_STATUS[
-            _states[_states.index(self.status) + 1]
-        ]
-        self.write_transcription_data()
-
-    def initiate(self):
-        if not pathlib.Path(self.out_path).exists():
-            logger.log(
-                f"Output file doesn't exist, initiating new output file {self.out_path}"
-            )
-            self.status = "Init"
-            self.data = {}
-            self.write_transcription_data()
-            logger.log(f"Initiated new output file {self.out_path}")
-            pass
-        else:
-            self.get_output()
 
     def write_output_data(self, data):
         self.data = data
@@ -93,21 +63,50 @@ class output_handler:
                 ensure_ascii=False,
                 indent=4,
             )
-        pass
 
     def get_output(self):
         if not pathlib.Path(self.out_path).exists():
             self.output = {}
+            self.status = "Not Found"  # Set status for missing files
+            self.data = None
             return -1
 
-        with open(self.out_path, "r", encoding="utf-8") as output_file:
-            _output = json.load(output_file)
-            self.status = _output.get("status")
-            self.data = _output.get("data", None)
-            self.output = _output
+        try:
+            with open(self.out_path, "r", encoding="utf-8") as output_file:
+                _output = json.load(output_file)
+                self.status = _output.get("status", "Unknown")
+                self.data = _output.get("data", None)
+                self.output = _output
+            return 0
+        except (json.JSONDecodeError, FileNotFoundError, Exception) as e:
+            logger.error(f"Error reading transcript file for {self.vid}: {e}")
+            self.output = {}
+            self.status = "Failed"  # Set status for corrupted/invalid files
+            self.data = None
+            return -1
 
-        return 0
+
+def store_speaker_settings(vid: str, enable_speakers: bool, num_speakers: int):
+    """Store speaker settings for a given video ID."""
+    outputHandler = output_handler(vid)
+    speaker_settings = {
+        "enable_speakers": enable_speakers,
+        "num_speakers": num_speakers
+    }
+    outputHandler.update_field("speaker_settings", speaker_settings)
+    outputHandler.write_transcription_data()
+    logger.info(f"Stored speaker settings for {vid}: {speaker_settings}")
 
 
-if __name__ == "__main__":
-    print(get_vid_from_url("https://www.youtube.com/watch?v=tAGnKpE4NCI"))
+def get_speaker_settings(vid: str):
+    """Retrieve speaker settings for a given video ID."""
+    outputHandler = output_handler(vid)
+    speaker_settings = outputHandler.output.get("speaker_settings", {})
+    
+    # Default values if not found
+    enable_speakers = speaker_settings.get("enable_speakers", True)
+    num_speakers = speaker_settings.get("num_speakers", 2)
+    
+    logger.info(f"Retrieved speaker settings for {vid}: enable={enable_speakers}, num={num_speakers}")
+    return enable_speakers, num_speakers
+

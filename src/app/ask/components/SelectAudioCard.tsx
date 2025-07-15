@@ -16,13 +16,13 @@ export default function SelectAudioCard({ ...props }: SelectAudioCardProps) {
         <section {...props}>
             <Card className="w-full bg-card border border-border shadow-sm">
                 <CardHeader className="">
-                    <h2 className="font-heading text-lg font-semibold text-foreground">Upload Your Audio</h2>
-                    <CardDescription className="text-subheading_sm">
+                    <h2 className="font-heading text-base font-semibold text-foreground">Upload Your Audio</h2>
+                    <CardDescription className="text-subheading_sm text-muted-foreground">
                         Drop your audio file below and we&apos;ll transcribe it for you.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-5">
-                    <InputFile />
+                            <InputFile />
                 </CardContent>
             </Card>
         </section>

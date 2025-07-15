@@ -1,14 +1,13 @@
 import { Metadata } from "next";
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
 import { TranscriptPage } from "./TranscriptPage";
-import { getQueryClient } from "@/app/get-query-client";
-import { dataFetchOptions } from "./data-fetch-options";
+import { getQueryClient } from "@/app/GetQueryClient";
+import { dataFetchOptions } from "./DataFetchOptions";
 import Providers from "@/app/providers";
 
 export const metadata: Metadata = {
     title: "Munshi | Transcript",
-    description:
-        "   An AI-powered assistant that transcribes and summarises audio so that you don't have to.",
+    description: "AI-powered audio transcription and summarization results.",
 };
 
 type TranscriptPageParams = Promise<{
@@ -25,12 +24,10 @@ export default async function TranscriptPageWrapper({ params }: PageProps) {
     void queryClient.prefetchQuery(dataFetchOptions(id));
 
     return (
-        <>
-            <Providers>
-                <HydrationBoundary state={dehydrate(queryClient)}>
-                    <TranscriptPage params={{ id }} />
-                </HydrationBoundary>
-            </Providers>
-        </>
+        <Providers>
+            <HydrationBoundary state={dehydrate(queryClient)}>
+                <TranscriptPage params={{ id }} />
+            </HydrationBoundary>
+        </Providers>
     );
 }

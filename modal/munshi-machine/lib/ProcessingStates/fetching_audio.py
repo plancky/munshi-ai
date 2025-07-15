@@ -5,30 +5,26 @@ from ..utils import (
     updateOutputJson,
     updateOutputJsonDict,
     audio_path,
-    get_url_from_vid,
     output_handler,
 )
-from .Transcribing import TranscribingProcessingState
+from .transcribing import TranscribingProcessingState
 
 
 class FetchingAudioProcessingState:
     def __init__(self) -> None:
         self.StateSymbol = "FetchingAudio"
-        pass
 
     def _next_state(self):
         return TranscribingProcessingState()
 
     async def run_job(self, vid: str) -> int | bytes:
-        from ..download_audio import get_stored_audio, download_audio
+        from ..download_audio import get_stored_audio
 
         self.vid = vid
 
         logger.info(f"Fetching Audio...")
         # update new state on the output json
         updateOutputJson(vid, self.StateSymbol)
-
-        # call = get_audio.spawn(get_url_from_vid(vid), self)
 
         audiofile_path = audio_path(vid)
         oh = output_handler(vid)
@@ -37,10 +33,13 @@ class FetchingAudioProcessingState:
             if oh.output.get("title") is None:
                 self.update_metadata()
 
+            audio_data = get_stored_audio(audiofile_path)
+            
+            # Start processing chain
             await self._next_state().run_job(vid)
-            return get_stored_audio(audiofile_path)
+            
+            return audio_data
         try:
-            download_audio(get_url_from_vid(vid))
             self.update_metadata()
             await self._next_state().run_job(vid)
             return get_stored_audio(audiofile_path)

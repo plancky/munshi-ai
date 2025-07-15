@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 export default function Home() {
     return (
         <>
-            <div className="content-grid py-20">
-                <div className="h-full w-full full-width-gridless flex-1">
+            <div className="content-grid">
+                <div className="h-full w-full full-width-gridless flex-1 pt-16">
                     <AskMunishiSection />
                 </div>
             </div>
