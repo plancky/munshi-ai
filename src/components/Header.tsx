@@ -3,21 +3,12 @@ import { SparkleIcon, MicrophoneIcon } from "@phosphor-icons/react/dist/ssr";
 
 export default function Header() {
     return (
-<<<<<<< HEAD
-        <div className="full-width relative z-10">
-            <header className="full-width fixed w-full py-8 lg:bg-transparent">
-                <div className="flex items-center justify-between rounded-lg bg-white/80 backdrop-blur-xl border border-border shadow-sm px-4 py-3">
-                    <a href="/" className="flex items-center gap-2">
-                        <span className="font-normal">
-                            <Logo className="h-10" />
-=======
         <div className="full-width relative z-50">
             <header className="full-width fixed w-full py-4">
                 <div className="flex items-center justify-between rounded-xl backdrop-blur-lg border border-white/20 shadow-lg px-4 py-3 transition-all duration-300 hover:bg-card/90">
                     <a href="/" className="flex items-center gap-3 group">
                         <span className="font-normal transition-transform duration-200 group-hover:scale-105">
                             <Logo className="h-8" />
->>>>>>> origin/main
                         </span>
                         <span className="hidden font-heading text-base font-medium text-foreground lg:block">
                             Munshi

@@ -53,7 +53,6 @@ BASE_PYTHON_PACKAGES = [
 ]
 
 ML_PYTHON_PACKAGES = [
-    #"transformers==4.53.0",
     # Core PyTorch - using newer versions but keeping compatibility
     "torch==2.7.1",
     "torchaudio==2.7.1",

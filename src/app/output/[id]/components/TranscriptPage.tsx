@@ -2,7 +2,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import LoadingUI from "./LoadingUI";
 import TranscriptCard from "./TranscriptCard";
-import { dataFetchOptions } from "./DataFetchOptions";
+import { dataFetchOptions } from "../utils/DataFetchOptions";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 
 export function TranscriptPage({ params: { id } }: { params: { id: string } }) {

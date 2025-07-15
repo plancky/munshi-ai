@@ -1,6 +1,6 @@
 
 # Common formatting rules to avoid repetition
-HTML_FORMAT_RULES = "Use HTML tags ONLY: <h3>, <p>, <strong>, <ul>, <li>. NO markdown."
+HTML_FORMAT_RULES = "Use HTML tags ONLY: <h3>, <p>, <i>, <strong>, <ul>, <li>. NO markdown."
 
 clean_transcript_prompt = """Transform this Whisper transcript into polished text while preserving original meaning and voice.
 
@@ -14,10 +14,10 @@ CLEANING RULES:
 • Break into logical paragraphs, maintain conversational tone
 
 AD/SPONSOR DETECTION:
-• Identify obvious advertisements, sponsorships, or promotional content
+• Identify obvious advertisements, sponsorships, or promotional content.
 • Include: "This episode is sponsored by...", product placements, discount codes, promotional segments
 • Wrap detected ads with [AD] tags: [AD]This episode is sponsored by BetterHelp. BetterHelp offers...[/AD]
-• An Ad always deserves its own paragraph.
+• An Ad always deserves its own paragraph. If the guy keeps talking about the same thing, it's an ad.
 • Don't flag brief organic mentions of companies in conversation context
 
 CONSTRAINTS:
@@ -35,6 +35,7 @@ CRITICAL SPEAKER DETECTION RULES:
 • Look for introductions, name mentions, context clues
 • If someone says "I'm [Name]" or is addressed as "[Name]", map that speaker
 • Once you identify a name, use it consistently throughout
+• If you are not able to find a name, you can also attribute the speaker to "Host" or "Guest" or "Lecturer"..
 
 SPEAKER CONSISTENCY:
 • Merge broken speaker segments from the same person

@@ -6,8 +6,6 @@ export interface ModedOutputDataObject {
     summary_gemini: string;
     speaker_transcript?: string;
     speaker_mappings?: Record<string, string>;
-    paras?: string[];
-    speaker_paras?: string[];
 }
 
 export interface ModedOutputObject extends OutputObject {

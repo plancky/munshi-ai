@@ -28,7 +28,7 @@ class WhisperX:
         import torch
         
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.batch_size = 16
+        self.batch_size = 32
         self.compute_type = "float16"
         
         # Load WhisperX model
@@ -67,7 +67,9 @@ class WhisperX:
             # Load and transcribe
             audio = whisperx.load_audio(audio_file_path)
 
-            raw_transcript_result = self.model.transcribe(audio, batch_size=self.batch_size)
+            raw_transcript_result = self.model.transcribe(audio, 
+                                                          batch_size=self.batch_size,
+                                                          print_progress=True)
             
             logger.info(f"📝 Raw transcription completed: {len(raw_transcript_result.get('segments', []))} segments")
             logger.info(f"🔍 Language detected: {raw_transcript_result.get('language', 'unknown')}")

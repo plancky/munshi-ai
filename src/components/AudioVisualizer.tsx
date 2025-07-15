@@ -1,9 +1,5 @@
 "use client";
 import React, { useEffect, useRef, useState } from 'react';
-<<<<<<< HEAD
-import WaveSurfer from 'wavesurfer.js';
-=======
->>>>>>> origin/main
 import { Play, Pause } from 'lucide-react';
 import { Button } from './ui/button';
 
@@ -13,64 +9,6 @@ interface AudioVisualizerProps {
 }
 
 export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisualizerProps) {
-<<<<<<< HEAD
-  const waveformRef = useRef<HTMLDivElement>(null);
-  const wavesurfer = useRef<WaveSurfer | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [duration, setDuration] = useState(0);
-  const [currentTime, setCurrentTime] = useState(0);
-
-  useEffect(() => {
-    if (waveformRef.current) {
-      // Initialize WaveSurfer
-      wavesurfer.current = WaveSurfer.create({
-        container: waveformRef.current,
-        waveColor: 'hsl(215, 20%, 65%)', // muted-foreground
-        progressColor: 'hsl(213, 93%, 68%)', // primary
-        cursorColor: 'hsl(213, 93%, 68%)', // primary
-        barWidth: 2,
-        barGap: 1,
-        barRadius: 1,
-        responsive: true,
-        height: 60,
-        normalize: true,
-        backend: 'WebAudio',
-      });
-
-      // Load audio
-      wavesurfer.current.load(audioUrl);
-
-      // Event listeners
-      wavesurfer.current.on('ready', () => {
-        setDuration(wavesurfer.current?.getDuration() || 0);
-      });
-
-      wavesurfer.current.on('audioprocess', () => {
-        setCurrentTime(wavesurfer.current?.getCurrentTime() || 0);
-      });
-
-      wavesurfer.current.on('play', () => {
-        setIsPlaying(true);
-      });
-
-      wavesurfer.current.on('pause', () => {
-        setIsPlaying(false);
-      });
-
-      wavesurfer.current.on('finish', () => {
-        setIsPlaying(false);
-      });
-    }
-
-    return () => {
-      wavesurfer.current?.destroy();
-    };
-  }, [audioUrl]);
-
-  const togglePlayPause = () => {
-    if (wavesurfer.current) {
-      wavesurfer.current.playPause();
-=======
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -134,7 +72,6 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
       const newTime = parseFloat(e.target.value);
       audioRef.current.currentTime = newTime;
       setCurrentTime(newTime);
->>>>>>> origin/main
     }
   };
 
@@ -147,8 +84,6 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
   return (
     <div className={`bg-muted rounded-lg border p-4 ${className}`}>
       <div className="flex items-center gap-4">
-<<<<<<< HEAD
-=======
         {/* Hidden audio element */}
         <audio
           ref={audioRef}
@@ -162,37 +97,23 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
           onEnded={handleEnded}
         />
 
->>>>>>> origin/main
         {/* Play/Pause Button */}
         <Button
           onClick={togglePlayPause}
           variant="default"
           size="icon"
-<<<<<<< HEAD
-          className="flex-shrink-0 w-10 h-10 rounded-full"
-        >
-          {isPlaying ? (
-=======
           disabled={isLoading}
           className="flex-shrink-0 w-10 h-10 rounded-full"
         >
           {isLoading ? (
             <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : isPlaying ? (
->>>>>>> origin/main
             <Pause className="w-4 h-4" />
           ) : (
             <Play className="w-4 h-4 ml-0.5" />
           )}
         </Button>
 
-<<<<<<< HEAD
-        {/* Waveform Container */}
-        <div className="flex-1 min-w-0">
-          <div 
-            ref={waveformRef} 
-            className={`w-full ${isPlaying ? 'animate-pulse' : ''}`}
-=======
         {/* Progress Bar */}
         <div className="flex-1 min-w-0">
           <input
@@ -205,7 +126,6 @@ export default function AudioVisualizer({ audioUrl, className = "" }: AudioVisua
             style={{
               background: `linear-gradient(to right, hsl(213, 93%, 68%) 0%, hsl(213, 93%, 68%) ${(currentTime / (duration || 1)) * 100}%, hsl(215, 20%, 65%) ${(currentTime / (duration || 1)) * 100}%, hsl(215, 20%, 65%) 100%)`
             }}
->>>>>>> origin/main
           />
         </div>
 
