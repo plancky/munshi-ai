@@ -1,7 +1,7 @@
 import { MODAL_URL } from "@/lib/url";
 import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
-import { cleanSummaryHtmlString, formatTranscriptInParagraphs, formatSpeakerTranscriptInParagraphs } from "./utils";
+import { cleanSummaryHtmlString } from "./utils";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 import { OutputObject } from "@/shared/types";
 import { ModedOutputObject } from "./types";
@@ -27,15 +27,9 @@ export async function GET(req: NextRequest) {
         const dataObject = modedResObject?.data;
 
         if (typeof dataObject !== "undefined") {
-            const { summary_gemini: summary, text, speaker_transcript } = dataObject;
+            const { summary_gemini: summary } = dataObject;
             if (summary) {
                 dataObject.summary_gemini = cleanSummaryHtmlString(summary);
-            }
-            if (text) {
-                dataObject.paras = formatTranscriptInParagraphs(text, 200);
-            }
-            if (speaker_transcript) {
-                dataObject.speaker_paras = formatSpeakerTranscriptInParagraphs(speaker_transcript, 120);
             }
         }
 
