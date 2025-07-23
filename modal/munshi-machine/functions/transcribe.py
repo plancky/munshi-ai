@@ -69,7 +69,7 @@ class WhisperX:
 
             raw_transcript_result = self.model.transcribe(audio, 
                                                           batch_size=self.batch_size,
-                                                          print_progress=True)
+                                                          verbose=True)
             
             logger.info(f"📝 Raw transcription completed: {len(raw_transcript_result.get('segments', []))} segments")
             logger.info(f"🔍 Language detected: {raw_transcript_result.get('language', 'unknown')}")

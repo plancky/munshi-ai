@@ -2,18 +2,17 @@
 import ClipboardCopy from "@/components/ClipboardCopy";
 import { TRANSCRIPTION_STATUS } from "@/shared/constants";
 import { CircleNotchIcon, WaveformIcon, MicrophoneIcon, SparkleIcon, CheckCircleIcon } from "@phosphor-icons/react/dist/ssr";
-import { useState, useEffect } from "react";
 
 const LOADING_MESSAGES = {
     [TRANSCRIPTION_STATUS.HOLD]: {
-        title: "Connecting to server",
-        subtitle: "Establishing connection with our AI transcription service",
+        title: "Warming up the AI engines",
+        subtitle: "Getting our transcription wizards ready for your audio",
         icon: CircleNotchIcon,
         progress: 10
     },
     [TRANSCRIPTION_STATUS.INIT]: {
-        title: "Initializing transcription",
-        subtitle: "Setting up your audio file for processing",
+        title: "Rolling up our sleeves",
+        subtitle: "Prepping your audio file",
         icon: CircleNotchIcon,
         progress: 20
     },
@@ -30,14 +29,14 @@ const LOADING_MESSAGES = {
         progress: 70
     },
     [TRANSCRIPTION_STATUS.SUMMARIZING]: {
-        title: "Creating intelligent summary",
-        subtitle: "Analyzing content and generating key insights",
+        title: "Adding the cherry on top",
+        subtitle: "Crafting insights that would make a consultant jealous",
         icon: SparkleIcon,
         progress: 90
     },
     [TRANSCRIPTION_STATUS.COMPLETED]: {
-        title: "Ready!",
-        subtitle: "Your transcript and summary are complete",
+        title: "Boom! We&apos;re done",
+        subtitle: "Your transcript is ready and it&apos;s pretty spectacular",
         icon: CheckCircleIcon,
         progress: 100
     },
@@ -90,7 +89,7 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
                                 </div>
                                 
                                 <div className="space-y-2">
-                                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                                    <h1 className="text-lg lg:text-xl font-bold text-foreground">
                                         {messageData?.title || "Processing"}
                                     </h1>
                                     {messageData?.subtitle && (
@@ -121,8 +120,8 @@ export default function LoadingUI(props: { state: TRANSCRIPTION_STATUS }) {
                                 </h3>
                                 <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed">
                                     {isProcessing
-                                        ? "Keep this page open or bookmark this link to check back later. Processing typically takes 2-5 minutes."
-                                        : "Your request is in our processing queue. Save this link to check your results anytime."}
+                                        ? "Keep this tab open or bookmark this link. We're working hard on your transcript (usually takes 2-5 minutes)."
+                                        : "Your audio is in our priority queue. Bookmark this link and check back soon for transcription gold."}
                                 </p>
                             </div>
                             

@@ -79,7 +79,7 @@ function AnimatedDemo() {
     const [displayedText, setDisplayedText] = useState('');
     const [showSummary, setShowSummary] = useState(false);
     
-    const fullText = '"Welcome to today\'s meeting. Let\'s start by reviewing the quarterly results..."';
+    const fullText = '"I mean, honestly, our quarterly numbers are absolutely crushing it. We\'re not just meeting targets, we\'re making them look embarrassing..."';
     
     useEffect(() => {
         const animationCycle = () => {
@@ -168,7 +168,7 @@ function AnimatedDemo() {
                             )}
                             {showSummary && (
                                 <div className="text-xs text-muted-foreground pt-3 border-t border-border animate-in fade-in duration-500">
-                                    ✨ Summary: Discussion of Q3 performance metrics and strategic planning for Q4.
+                                    ✨ Summary: CEO flexing quarterly dominance while casually planning world conquest.
                                 </div>
                             )}
                         </div>

@@ -101,8 +101,8 @@ export function SpeakerSettings() {
                             <div className="flex items-start gap-2 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                                 <ClockIcon className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                                 <div className="text-xs text-yellow-700 dark:text-yellow-300">
-                                    <p className="font-medium">Processing Time Notice</p>
-                                    <p className="leading-relaxed">Speaker detection adds 8-10 minutes to processing time but provides better conversation flow.</p>
+                                    <p className="font-medium">Fair warning</p>
+                                    <p className="leading-relaxed">Speaker detection adds 8-10 minutes but makes conversations way easier to follow.</p>
                                 </div>
                             </div>
                         </>

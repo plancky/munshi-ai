@@ -8,6 +8,12 @@ logger = config.get_logger("UTILS")
 
 
 def audio_path(vid: str) -> pathlib.Path:
+    """Find audio file with any supported extension."""
+    for ext in ['.mp3', '.wav', '.m4a', '.mp4', '.mov', '.avi']:
+        path = pathlib.Path(RAW_AUDIO_DIR, f"{vid}{ext}")
+        if path.exists():
+            return path
+    # Fallback to .mp3 for backwards compatibility
     return pathlib.Path(RAW_AUDIO_DIR, f"{vid}.mp3")
 
 
@@ -38,7 +44,7 @@ class output_handler:
     def __init__(self, vid):
         self.vid = vid
         self.out_path = f"{TRANSCRIPTIONS_DIR}/{vid}.json"
-        self.audio_path = f"{RAW_AUDIO_DIR}/{vid}.mp3"
+        self.audio_path = str(audio_path(vid))
         # Initialize status to None, will be set by get_output()
         self.status = None
         self.data = None

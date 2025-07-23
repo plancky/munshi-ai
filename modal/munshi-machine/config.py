@@ -1,13 +1,5 @@
-import dataclasses
 import logging
 import pathlib
-
-
-@dataclasses.dataclass
-class ModelSpec:
-    name: str
-    params: str
-    relative_speed: int  # Higher is faster
 
 
 def get_logger(name, level=logging.INFO):
@@ -27,18 +19,9 @@ MODEL_DIR = "/model"
 CACHE_DIR = "/cache"
 RAW_AUDIO_DIR = pathlib.Path(CACHE_DIR, "raw_audio")
 
-UPLOAD_CHUNK_DIR = pathlib.Path(CACHE_DIR, "chunks")
-UPLOAD_AUDIO_DIR = pathlib.Path(CACHE_DIR, "upload_audio")
-
-# Stores metadata of individual podcast episodes as JSON.
-PODCAST_METADATA_DIR = pathlib.Path(CACHE_DIR, "podcast_metadata")
-
 # Completed episode transcriptions. Stored as flat files with
 # files structured as '{guid_hash}-{model_slug}.json'.
 TRANSCRIPTIONS_DIR = pathlib.Path(CACHE_DIR, "transcriptions")
-
-# Location of web other static files to be cached
-ASSETS_PATH = pathlib.Path(__file__).parent / "frontend" / "dist"
 
 # python dependencies
 BASE_PYTHON_PACKAGES = [

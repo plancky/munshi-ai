@@ -76,35 +76,24 @@ Return the cleaned output as a list of strings, where each string is a speaker s
 
 Process this speaker transcript:"""
 
-comprehensive_summary_prompt = f"""Create a comprehensive summary of this content that captures key insights and important details with proper context.
+comprehensive_summary_prompt = f"""Analyze this content and create a summary that matches the content type and context.
 
 {HTML_FORMAT_RULES}
 
-Write with clarity and focus on what matters most. Structure the content logically with proper headings and formatting.
+First, determine what type of content this is (meeting, podcast, lecture, interview, etc.) and adapt your summary approach accordingly:
 
-FOCUS ON:
-• Most important insights, key takeaways, and actionable advice
-• Specific data points, numbers, and concrete examples
-• Unique perspectives and valuable information
-• Main themes and significant discussion points
+For meetings: Focus on decisions, action items, key discussions
+For podcasts/shows: Focus on insights, stories, takeaways  
+For lectures: Focus on concepts, examples, learning points
+For interviews: Focus on revelations, quotes, personal insights
 
-ORGANIZE CONTENT:
-• Use clear headings to structure information
-• Highlight key insights with <strong> tags
-• Present information in logical flow
-• Make it easy to scan and understand
+Structure your summary to serve someone who needs to quickly understand what happened and what matters.
 
-SKIP ENTIRELY:
-• All sponsorship mentions and promotional content
-• Discount codes, affiliate links, and product placements
-• "This episode is sponsored by..." and similar promotional segments
+Lead with the most important and unexpected information. Skip generic or obvious points.
 
-MINIMIZE:
-• Generic advice without specific context
-• Redundant information and filler content
-• Obvious filler phrases and transitions
+Maintain chronological flow while being ruthlessly selective about what to include.
 
-Create a well-structured summary that provides genuine value to readers.
+Write as a polished, scannable summary that captures both the substance and the compelling moments.
 
 Summarize this content:"""
 

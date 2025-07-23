@@ -1,4 +1,4 @@
-from ..config import RAW_AUDIO_DIR, get_logger
+from ..config import get_logger
 
 logger = get_logger("DOWNLOAD_AUDIO", 10)
 
@@ -12,8 +12,9 @@ def get_stored_audio(path: str):
 def get_metadata(vid):
     try:
         from mutagen.easyid3 import EasyID3
+        from .utils import audio_path
 
-        path = f"{RAW_AUDIO_DIR}/{vid}.mp3"
+        path = str(audio_path(vid))
         audio = EasyID3(path)
         logger.info(f"Found ID3 tags: {audio}")
         

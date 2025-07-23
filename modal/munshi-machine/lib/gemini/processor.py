@@ -57,6 +57,7 @@ class GeminiProcessor:
                     
                     if not response.parsed:
                         log_gemini(f"⚠️ No parsed data in response for {task_type} (attempt {attempt + 1})", "WARN")
+                        log_gemini(f"TextualResponse: {response.text}", "WARN")
                         # This is a parsing failure, not a network error - continue to next attempt
                         if attempt < max_retries - 1:
                             wait_time = ERROR_HANDLING["initial_delay"] + (ERROR_HANDLING["backoff_multiplier"] ** attempt)

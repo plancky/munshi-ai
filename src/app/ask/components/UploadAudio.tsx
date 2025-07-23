@@ -2,25 +2,32 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { FormStateContext, useFormState } from "./FormStateProvider";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useState, useEffect } from "react";
 import { FormStateActionTypes } from "./FormStateReducer";
 import { Icons } from "@/components/icons/icons";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/lib/hooks/use-toast";
-import { uploadFileInChunks } from "./utils";
+import { uploadFile } from "../utils/utils";
 import { CheckCircleIcon, UploadIcon } from "@phosphor-icons/react/dist/ssr";
 import AudioVisualizer from "@/components/AudioVisualizer";
 import { useMutation } from "@tanstack/react-query";
 import { MODAL_URL } from "@/lib/url";
+import { generateFileHash } from "../utils/utils";
 
 // Wrapper to properly manage blob URL lifecycle
-function AudioVisualizerWrapper({ file, className }: { file: File; className: string }) {
-    const [audioUrl, setAudioUrl] = React.useState<string>("");
+function AudioVisualizerWrapper({
+    file,
+    className,
+}: {
+    file: File;
+    className: string;
+}) {
+    const [audioUrl, setAudioUrl] = useState<string>("");
 
-    React.useEffect(() => {
+    useEffect(() => {
         const url = URL.createObjectURL(file);
         setAudioUrl(url);
-        
+
         // Cleanup blob URL when component unmounts or file changes
         return () => {
             URL.revokeObjectURL(url);
@@ -39,26 +46,38 @@ export function InputFile() {
     return (
         <>
             {!audioFile ? (
-                <Card className="border-2 border-dashed border-primary/30 bg-primary/5 hover:border-primary/50 hover:bg-primary/10 transition-colors duration-200 mx-0">
+                <Card className="mx-0 border-2 border-dashed border-primary/30 bg-primary/5 transition-colors duration-200 hover:border-primary/50 hover:bg-primary/10">
                     <CardContent className="p-8 text-center text-muted-foreground">
-                        <Label htmlFor="audio" className="cursor-pointer block w-full">
+                        <Label
+                            htmlFor="audio"
+                            className="block w-full cursor-pointer"
+                        >
                             <div className="flex flex-col items-center gap-3">
-                                <UploadIcon size={32} className="text-primary/60" />
+                                <UploadIcon
+                                    size={32}
+                                    className="text-primary/60"
+                                />
                                 <div>
-                                    <p className="text-base font-medium">Drop your audio file here</p>
-                                    <p className="text-sm">or click to browse</p>
-                                    <p className="text-xs text-muted-foreground/70 mt-2">Supports MP3 files</p>
+                                    <p className="text-base font-medium">
+                                        Drop your audio file here
+                                    </p>
+                                    <p className="mt-2 text-xs text-muted-foreground/70">
+                                        MP3, WAV, M4A • Under 500MB please
+                                    </p>
                                 </div>
                             </div>
                         </Label>
                         <Input
                             id="audio"
                             type="file"
-                            accept=".mp3"
+                            accept=".mp3,.wav,.m4a"
                             className="hidden"
                             onChange={async (event) => {
                                 const files = event.target.files;
                                 if (files?.length) {
+                                    const extension = files[0].name
+                                        .split(".")
+                                        .pop();
                                     const id = btoa(self.crypto.randomUUID())
                                         .replace("+", "-")
                                         .replace("/", "_")
@@ -66,16 +85,22 @@ export function InputFile() {
                                         .slice(0, 16);
 
                                     const file = new File(
-                                        [new Blob([await files[0].arrayBuffer()], { type: files[0].type })],
-                                        id,
-                                        { type: files[0].type }
+                                        [
+                                            new Blob(
+                                                [await files[0].arrayBuffer()],
+                                                { type: files[0].type },
+                                            ),
+                                        ],
+                                        id + "." + extension,
+                                        { type: files[0].type },
                                     );
 
                                     // Validate file size (max 500MB)
                                     if (files[0].size > 500 * 1024 * 1024) {
                                         toast({
-                                            title: "File too large",
-                                            description: "Please select a file smaller than 500MB.",
+                                            title: "Whoa there, bigshot",
+                                            description:
+                                                "That file&apos;s too chunky. Keep it under 500MB.",
                                         });
                                         return;
                                     }
@@ -116,9 +141,18 @@ export function VisualAudioFile() {
                         <CardContent className="p-4">
                             <div className="flex items-center gap-3">
                                 <div className="text-primary">📁</div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">{audioFile.metadata.name}</p>
-                                    <p className="text-xs text-muted-foreground">MP3 • {(audioFile.metadata.size / 1024 / 1024).toFixed(1)} MB</p>
+                                <div className="min-w-0 flex-1">
+                                    <p className="truncate text-sm font-medium">
+                                        {audioFile.metadata.name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {(
+                                            audioFile.metadata.size /
+                                            1024 /
+                                            1024
+                                        ).toFixed(1)}{" "}
+                                        MB
+                                    </p>
                                 </div>
                                 <Button
                                     variant={"default"}
@@ -137,7 +171,7 @@ export function VisualAudioFile() {
                     </Card>
 
                     {audioFile?.file && (
-                        <AudioVisualizerWrapper 
+                        <AudioVisualizerWrapper
                             file={audioFile.file}
                             className="w-full"
                         />
@@ -152,17 +186,15 @@ export function VisualAudioFile() {
 
 function UploadButton() {
     const { formState, dispatch } = useFormState();
-    const progressBar = useRef<HTMLDivElement>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [isCheckingExisting, setIsCheckingExisting] = useState(false);
 
     const url = MODAL_URL + "/upload_file";
 
     const { mutate, isPending, isSuccess, isError, isIdle } = useMutation({
         mutationFn: () => {
-            return uploadFileInChunks(
-                formState.audioFile?.file!,
-                formState.audioFile?.metadata,
-                url,
-                progressBar.current,
+            return uploadFile(formState.audioFile?.file!, url, (progress) =>
+                setUploadProgress(progress),
             );
         },
         onMutate: (variables) => {
@@ -170,15 +202,17 @@ function UploadButton() {
         },
         onError: (error, variables, context) => {
             // Check if it was user-cancelled
-            if (error instanceof Error && error.name === 'AbortError') {
+            if (error instanceof Error && error.name === "AbortError") {
                 toast({
-                    title: "Upload Cancelled",
-                    description: "File upload was cancelled by user.",
+                    title: "Changed your mind?",
+                    description:
+                        "No worries, we&apos;ll be here when you&apos;re ready.",
                 });
             } else {
                 toast({
-                    title: "Failed to Upload!",
-                    description: "Could not upload! Retry later!",
+                    title: "Oops, that didn&apos;t work",
+                    description:
+                        "Something went sideways. Give it another shot?",
                 });
             }
         },
@@ -190,38 +224,102 @@ function UploadButton() {
                 },
             });
             toast({
-                title: "Uploaded",
-                description: "Data uploaded.",
+                title: "Locked and loaded!",
+                description:
+                    "Your audio is uploaded and ready to be transcribed.",
             });
         },
         onSettled: (data, error, variables, context) => {},
     });
 
     const onSubmit = useCallback(async () => {
-        mutate();
-    }, [mutate]);
+        if (!formState.audioFile?.file) return;
+
+        try {
+            setIsCheckingExisting(true);
+
+            // Generate hash-based vid for checking existing transcript
+            const vid = await generateFileHash(formState.audioFile.file);
+
+            // Check if transcript already exists
+            const response = await fetch(`${MODAL_URL}/fetch_data`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ vid }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+
+                if (data.status === "Completed" && data.data) {
+                    // Transcript exists! Redirect to output page
+                    toast({
+                        title: "We've seen this before! 🎯",
+                        description:
+                            "This file was already transcribed. Taking you there now...",
+                        duration: 3000,
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = `/output/${vid}`;
+                    }, 1500);
+                    return;
+                }
+            }
+
+            // No existing transcript found, proceed with upload
+            setIsCheckingExisting(false);
+            mutate();
+        } catch (error) {
+            console.error("Failed to check existing transcript:", error);
+            // On error, proceed with upload anyway
+            setIsCheckingExisting(false);
+            mutate();
+        }
+    }, [mutate, formState.audioFile]);
 
     return (
         <>
-            <div ref={progressBar} className="flex w-full">
+            <div className="flex w-full">
                 {!formState.isUploaded ? (
                     <>
-                        {isPending ? (
-                            <div className="space-y-3">
+                        {isPending || isCheckingExisting ? (
+                            <div className="w-full space-y-3">
                                 <div className="flex items-center justify-between text-sm">
-                                    <span className="text-muted-foreground">Uploading...</span>
-                                    <span className="text-xs text-muted-foreground">Please wait</span>
+                                    <span className="text-muted-foreground">
+                                        {isCheckingExisting
+                                            ? "Checking if we've seen this before..."
+                                            : "Sending it up to the cloud..."}
+                                    </span>
+                                    {!isCheckingExisting && (
+                                        <span className="text-xs text-muted-foreground">
+                                            {uploadProgress}%
+                                        </span>
+                                    )}
                                 </div>
-                                <div className="relative h-2 w-full rounded-full bg-muted overflow-hidden">
-                                    <div 
-                                        className="absolute h-full w-[var(--filled,0%)] rounded-full bg-primary transition-all duration-300 ease-out"
+                                <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                                    <div
+                                        className={`absolute h-full rounded-full bg-primary transition-all duration-300 ease-out ${
+                                            isCheckingExisting
+                                                ? "animate-ping"
+                                                : ""
+                                        }`}
+                                        style={{
+                                            width: isCheckingExisting
+                                                ? "100%"
+                                                : `${uploadProgress}%`,
+                                        }}
                                     />
                                 </div>
                             </div>
                         ) : (
                             <div className="flex gap-2">
                                 <Button
-                                    disabled={!formState?.audioFile || isPending}
+                                    disabled={
+                                        !formState?.audioFile ||
+                                        isPending ||
+                                        isCheckingExisting
+                                    }
                                     onClick={() => {
                                         onSubmit();
                                     }}

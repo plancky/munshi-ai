@@ -37,7 +37,7 @@ const nextConfig = {
     },
     experimental: {
         serverActions: {
-            bodySizeLimit: "20mb",
+            bodySizeLimit: '500mb', // Match backend 500MB limit
         },
         optimizePackageImports: ["@phosphor-icons/react"],
     },

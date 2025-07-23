@@ -31,39 +31,36 @@ from fastapi import (
     HTTPException,
     status,
 )
-from ..lib.upload_utils import upload_chunk
+from ..lib.upload_utils import stream_upload
 
 
-async def valid_content_length(content_length: int = Header(..., lt=524_288_000)):
+async def valid_content_length(content_length: int = Header(None)):
+    """Validate content length if provided, but don't require it."""
+    if content_length is not None and content_length >= 524_288_000:
+        raise HTTPException(status_code=413, detail="File too large (max 500MB)")
     return content_length
 
 
 @web_app.post("/upload_file", dependencies=[Depends(valid_content_length)])
 async def upload_file(
-    chunk: UploadFile = File(...),
-    chunkIndex: int = Form(...),
-    totalChunks: int = Form(...),
+    file: UploadFile = File(...),
     fileName: str = Form(...),
 ):
-
+    """
+    Streaming upload endpoint that replaces the previous chunked upload system.
+    Maintains the same endpoint name for frontend compatibility.
+    """
     try:
-        if totalChunks > 60:
-            raise HTTPException(
-                status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="too many chunks"
-            )
-
-        result = await upload_chunk(
-            chunk,
-            chunkIndex,
-            totalChunks,
-            fileName,
-        )
-
+        logger.info(f"Upload request received - fileName: {fileName}, file size: {file.size if hasattr(file, 'size') else 'unknown'}")
+        logger.info(f"File content type: {file.content_type}")
+        
+        result = await stream_upload(file, fileName)
         uploaded, fileId, is_existing = result[:3]
 
         if uploaded:
             if is_existing:
                 # File already exists, return special status to redirect
+                logger.info(f"Existing transcript found for file: {fileId}")
                 return responses.JSONResponse(
                     content={
                         "status": "transcript_exists", 
@@ -74,19 +71,21 @@ async def upload_file(
                 )
             else:
                 # New file uploaded successfully
+                logger.info(f"New file uploaded successfully: {fileId}")
                 return responses.JSONResponse(
-                    content={"status": "chunk received", "id": fileId}, status_code=200
+                    content={"status": "file uploaded", "id": fileId}, status_code=200
                 )
         else:
+            logger.error("Upload failed - stream_upload returned False")
             return responses.JSONResponse(
-                content={"status": "chunk not received"}, status_code=403
+                content={"status": "file not uploaded"}, status_code=403
             )
     except HTTPException as e:
+        logger.error(f"HTTP Exception in upload: {e.status_code} - {e.detail}")
         raise e
     except Exception as e:
-        logger.error(f"Upload error: {e}")
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="something went wrong")
-
+        logger.error(f"Unexpected upload error: {e}", exc_info=True)
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=f"Upload failed: {str(e)}")
 
 @web_app.post("/transcribe_local")
 async def transcribe_local(request: Request):

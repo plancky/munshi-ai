@@ -60,14 +60,14 @@ function TranscribeButton() {
         onError: (error, variables, context) => {
             // An error happened!
             toast({
-                title: "Failed to initiate transcription!",
-                description: "Failed to process request! Retry later!",
+                title: "Houston, we have a problem",
+                description: "Something went wrong on our end. Try again in a moment!",
             });
         },
         onSuccess: (data, variables, context) => {
             toast({
-                title: "Transcription Initiated",
-                description: "redirecting...",
+                title: "We're on it!",
+                description: "Redirecting you to watch the magic happen...",
             });
             // Boom baby!
             window.history.pushState(

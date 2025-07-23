@@ -30,7 +30,7 @@ class TranscribingProcessingState:
 
         # Get speaker settings
         enable_speakers, num_speakers = get_speaker_settings(vid)
-        logger.info(f"Starting transcription for {vid} - Speakers: {enable_speakers}, Count: {num_speakers}")
+        print(f"Starting transcription for {vid} - Speakers: {enable_speakers}, Count: {num_speakers}")
 
         try:
             # Simple WhisperX call

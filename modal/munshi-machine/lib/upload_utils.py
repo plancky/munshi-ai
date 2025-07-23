@@ -1,11 +1,23 @@
-from typing import Annotated
+from typing import Tuple
 import hashlib
 import os
 import json
+import uuid
+import time
 
-from fastapi import UploadFile, Form, File
-from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR, UPLOAD_CHUNK_DIR
+from fastapi import UploadFile
+from ..config import RAW_AUDIO_DIR, TRANSCRIPTIONS_DIR
 from ..volumes import audio_storage_vol
+
+
+def generate_upload_id() -> str:
+    """Generate a unique upload ID for tracking."""
+    return str(uuid.uuid4())
+
+
+def generate_file_id_from_hash(content_hash: str) -> str:
+    """Generate deterministic file ID from content hash."""
+    return f"local_{content_hash[:16]}"
 
 
 def generate_file_id_from_content(file_content: bytes) -> str:
@@ -46,115 +58,149 @@ def check_existing_transcript(file_id: str) -> bool:
         return False
 
 
-async def upload_chunk(
-    chunk: Annotated[UploadFile, File()],
-    chunkIndex: Annotated[int, Form()],
-    total_chunks: Annotated[int, Form()],
-    fileName: Annotated[str, Form()],
-):
-    fileId = None
-    chunk_dir = None  # Track for cleanup
-
+async def stream_upload(
+    file: UploadFile,
+    fileName: str,
+) -> Tuple[bool, str, bool]:
+    """
+    Stream upload handler that replaces chunked upload system.
+    
+    Returns:
+        Tuple[bool, str, bool]: (success, file_id, is_existing_transcript)
+    """
+    upload_id = generate_upload_id()
+    temp_file_path = None
+    file_id = None
+    
     try:
-        # Use hash of filename to avoid path length issues
-        file_id_hash = hashlib.md5(fileName.encode()).hexdigest()[:16]
-        chunk_dir = os.path.join(UPLOAD_CHUNK_DIR, file_id_hash)
-        os.makedirs(chunk_dir, exist_ok=True)
+        print(f"🚀 Starting streaming upload for {fileName} (upload_id: {upload_id})")
 
-        # Validate chunk index
-        if chunkIndex < 0 or chunkIndex >= total_chunks:
-            raise Exception(f"Invalid chunk index: {chunkIndex} (expected 0-{total_chunks-1})")
-
-        chunk_path = os.path.join(chunk_dir, f"{chunkIndex}.part")
-
-        with open(chunk_path, "wb") as f:
-            f.write(await chunk.read())
-
-        # Check if all chunks are present
-        uploaded_chunks = os.listdir(chunk_dir)
-        print(f"🔍 Upload debug - Chunk {chunkIndex+1}/{total_chunks}, uploaded_chunks: {len(uploaded_chunks)}, files: {sorted(uploaded_chunks)}")
-
-        if len(uploaded_chunks) == total_chunks:
-            print("✅ All chunks received! Reconstructing file...")
-            
-            # Validate that all expected chunks exist
-            expected_chunks = set(f"{i}.part" for i in range(total_chunks))
-            actual_chunks = set(uploaded_chunks)
-            missing_chunks = expected_chunks - actual_chunks
-            extra_chunks = actual_chunks - expected_chunks
-            
-            if missing_chunks:
-                print(f"❌ Missing chunks: {sorted(missing_chunks)}")
-                print(f"❌ Expected: {sorted(expected_chunks)}")
-                print(f"❌ Actual: {sorted(actual_chunks)}")
-                raise Exception(f"Missing chunks: {missing_chunks}")
-            
-            if extra_chunks:
-                print(f"⚠️ Extra chunks found: {sorted(extra_chunks)} - these will be ignored")
-            
-            # Read all chunks to generate content hash
-            file_content = bytearray()
-            for i in range(total_chunks):
-                chunk_file_path = os.path.join(chunk_dir, f"{i}.part")
-                with open(chunk_file_path, "rb") as chunk_file:
-                    file_content.extend(chunk_file.read())
-                            
-            # Generate deterministic file ID based on content
-            fileId = generate_file_id_from_content(bytes(file_content))
-            print(f"🔑 Generated deterministic file ID: {fileId}")
-
-            # Check if transcript already exists
-            if check_existing_transcript(fileId):
-                print(f"🎯 Completed transcript found for {fileId}! Redirecting to existing transcript.")
-                # Clean up chunks
-                await cleanup_chunks(chunk_dir, total_chunks)
-                return [True, fileId, True]  # Third parameter indicates existing transcript
-            
-            # Write directly to final location (no cross-filesystem move needed)
-            final_path = os.path.join(RAW_AUDIO_DIR, fileId + ".mp3")
-            with open(final_path, "wb") as output_file:
-                output_file.write(file_content)
-
-            # Clean up chunks
-            await cleanup_chunks(chunk_dir, total_chunks)
-            audio_storage_vol.commit()
-            print(f"🎉 File upload complete! New file stored as: {fileId}")
-            return [True, fileId, False]  # Third parameter indicates new file
+        start_time = time.time()
         
-        # Not all chunks uploaded yet - don't clean up, wait for more chunks
-        return [True, fileId, False]
+        if not fileName:
+            raise ValueError("No fileName provided")
+        
+        # Validate file object
+        if not hasattr(file, 'read'):
+            raise ValueError("Invalid file object - missing read method")
+        
+        print(f"📋 File info - name: {fileName}, content_type: {getattr(file, 'content_type', 'unknown')}")
+        
+        # Validate file type (basic check)
+        if not fileName.lower().endswith(('.mp3', '.wav', '.m4a', '.mp4', '.mov', '.avi')):
+            raise ValueError(f"Unsupported file type: {fileName}")
+        
+        # Generate temporary file path
+        temp_file_path = os.path.join(RAW_AUDIO_DIR, f"{upload_id}.uploading")
+        
+        # Stream the file and calculate hash simultaneously
+        hasher = hashlib.sha256()
+        total_bytes = 0
+        
+        print(f"📥 Streaming to temporary file: {temp_file_path}")
+        
+        # Stream upload with simultaneous hashing
+        with open(temp_file_path, "wb") as temp_file:
+            try:
+                while True:
+                    # Read in 64KB chunks for optimal performance
+                    chunk = await file.read(65536)  # 64KB
+                    if not chunk:
+                        break
+                        
+                    # Write chunk to disk
+                    temp_file.write(chunk)
+                    
+                    # Update hash
+                    hasher.update(chunk)
+                    
+                    # Track progress
+                    total_bytes += len(chunk)
+                    
+            except Exception as read_error:
+                raise ValueError(f"Error reading file data: {read_error}")
+        
+        print(f"✅ Upload completed: {total_bytes} bytes in {time.time() - start_time:.2f} seconds")
+        
+        # Validate file size
+        if total_bytes == 0:
+            raise ValueError("File is empty (0 bytes)")
+        
+        if total_bytes > 524_288_000:  # 500MB
+            raise ValueError(f"File too large: {total_bytes} bytes (max 500MB)")
+        
+        # Generate deterministic file ID from content hash
+        content_hash = hasher.hexdigest()
+        file_id = generate_file_id_from_hash(content_hash)
+        print(f"🔑 Generated file ID: {file_id} (from hash: {content_hash[:16]})")
+        
+        # Check if transcript already exists before moving file
+        if check_existing_transcript(file_id):
+            print(f"🎯 Completed transcript found for {file_id}! Redirecting to existing transcript.")
+            # Clean up temporary file
+            if os.path.exists(temp_file_path):
+                os.remove(temp_file_path)
+            return [True, file_id, True]  # Third parameter indicates existing transcript
+        
+        # Extract file extension from original filename
+        file_extension = os.path.splitext(fileName)[1].lower()
+
+        
+        # Move to final location with atomic operation (preserve original extension)
+        final_path = os.path.join(RAW_AUDIO_DIR, f"{file_id}{file_extension}")
+        
+        # Check if final file already exists (edge case protection)
+        if os.path.exists(final_path):
+            print(f"⚠️ File already exists at {final_path}, removing temporary file")
+            os.remove(temp_file_path)
+            return [True, file_id, False]
+        
+        # Atomic move operation
+        os.rename(temp_file_path, final_path)
+        
+        # Commit volume changes
+        audio_storage_vol.commit()
+        
+        print(f"🎉 File successfully uploaded and stored as: {file_id}{file_extension}")
+        return [True, file_id, False]
+        
+    except (ValueError, TypeError) as validation_error:
+        print(f"❌ Validation error: {validation_error}")
+        # Clean up temporary file on error
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+                print(f"🧹 Cleaned up temporary file: {temp_file_path}")
+            except Exception as cleanup_error:
+                print(f"⚠️ Failed to cleanup temporary file: {cleanup_error}")
+        
+        # Re-raise validation errors for better error messages
+        raise validation_error
+        
     except Exception as e:
-        print(f"❌ Upload error: {e}")
-
-        # Remove audio and transcript files
-        if fileId and os.path.exists(os.path.join(RAW_AUDIO_DIR, f"{fileId}.mp3")):
-            os.remove(os.path.join(RAW_AUDIO_DIR, f"{fileId}.mp3"))
-        if fileId and os.path.exists(os.path.join(TRANSCRIPTIONS_DIR, f"{fileId}.json")):
-            os.remove(os.path.join(TRANSCRIPTIONS_DIR, f"{fileId}.json"))
-
-        # Only try to clean up if the directory exists
-        if chunk_dir and os.path.exists(chunk_dir):
-            await cleanup_chunks(chunk_dir, total_chunks)
+        print(f"❌ Unexpected upload error: {e}")
+        
+        # Clean up temporary file on error
+        if temp_file_path and os.path.exists(temp_file_path):
+            try:
+                os.remove(temp_file_path)
+                print(f"🧹 Cleaned up temporary file: {temp_file_path}")
+            except Exception as cleanup_error:
+                print(f"⚠️ Failed to cleanup temporary file: {cleanup_error}")
+        
+        # Clean up any partial final files
+        if file_id:
+            # Extract file extension for cleanup
+            file_extension = os.path.splitext(fileName)[1].lower() if fileName else '.mp3'
+            final_path = os.path.join(RAW_AUDIO_DIR, f"{file_id}{file_extension}")
+            if os.path.exists(final_path):
+                try:
+                    os.remove(final_path)
+                    print(f"🧹 Cleaned up partial final file: {final_path}")
+                except Exception as cleanup_error:
+                    print(f"⚠️ Failed to cleanup final file: {cleanup_error}")
+        
         return [False, None, False]
 
 
-async def cleanup_chunks(chunk_dir: str, total_chunks: int):
-    """Clean up chunk files and directory."""
-    try:
-        # Remove all chunk files
-        for i in range(total_chunks):
-            chunk_path = os.path.join(chunk_dir, f"{i}.part")
-            if os.path.exists(chunk_path):
-                os.remove(chunk_path)
-        
-        # Remove any other files that might be in the directory
-        if os.path.exists(chunk_dir):
-            for file in os.listdir(chunk_dir):
-                file_path = os.path.join(chunk_dir, file)
-                if os.path.isfile(file_path):
-                    os.remove(file_path)
-            
-            # Now try to remove the directory
-            os.rmdir(chunk_dir)
-    except Exception as e:
-        print(f"❌ Error cleaning up chunks: {e}")
+# 

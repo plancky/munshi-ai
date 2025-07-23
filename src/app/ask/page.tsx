@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { AskMunishiSection } from "./components/AskMunshiSection";
 
 export const metadata: Metadata = {
-    title: "Munshi - Ask",
+    title: "Munshi - Upload Your Audio",
     description:
         "   An AI-powered assistant that transcribes and summarises audio so that you don't have to.",
 };
